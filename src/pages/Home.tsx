@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight, CheckCircle2, Star, Users, Zap, Shield, Clock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { SERVICES, PROJECTS } from '../constants';
 import * as Icons from 'lucide-react';
 import SevenDayDelivery from '../components/SevenDayDelivery';
@@ -13,8 +13,30 @@ import VideoSection from '../components/VideoSection';
 import FAQ from '../components/FAQ';
 import WhyChooseUs from '../components/WhyChooseUs';
 import Blog from '../components/Blog';
+import { auth } from '../firebase';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import AuthModal from '../components/AuthModal';
 
 const Home = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleGetStarted = () => {
+    if (user) {
+      navigate('/contact');
+    } else {
+      setIsAuthModalOpen(true);
+    }
+  };
+
   return (
     <div className="overflow-hidden">
       {/* Hero Section */}
@@ -47,9 +69,9 @@ const Home = () => {
               Websites, Marketing & Design That Actually Grow Your Business. Partner with Showthink to dominate your industry.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link to="/contact" className="btn-primary flex items-center gap-2">
+              <button onClick={handleGetStarted} className="btn-primary flex items-center gap-2">
                 Get Started <ArrowRight size={20} />
-              </Link>
+              </button>
               <Link to="/portfolio" className="btn-secondary">
                 View Our Work
               </Link>
@@ -266,11 +288,17 @@ const Home = () => {
           <p className="text-xl text-white/60 mb-12 max-w-2xl mx-auto">
             Ready to take your business to the next level? Our team is standing by to help you achieve your digital goals.
           </p>
-          <Link to="/contact" className="btn-primary text-lg px-12 py-4">
+          <button onClick={handleGetStarted} className="btn-primary text-lg px-12 py-4">
             Contact Us Now
-          </Link>
+          </button>
         </div>
       </section>
+
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+        onSuccess={() => navigate('/contact')} 
+      />
     </div>
   );
 };

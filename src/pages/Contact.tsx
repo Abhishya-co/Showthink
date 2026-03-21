@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Send, MessageSquare } from 'lucide-react';
+import { db, collection, addDoc, serverTimestamp, handleFirestoreError, OperationType } from '../firebase';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -17,25 +18,18 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
+    const path = 'messages';
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      await addDoc(collection(db, path), {
+        ...formData,
+        createdAt: serverTimestamp()
       });
 
-      if (response.ok) {
-        setSubmitted(true);
-        setFormData({ name: '', email: '', phone: '', service: 'Digital Marketing', message: '' });
-      } else {
-        const errorData = await response.json();
-        alert(errorData.error || 'Failed to send message. Please try again.');
-      }
+      setSubmitted(true);
+      setFormData({ name: '', email: '', phone: '', service: 'Digital Marketing', message: '' });
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('An error occurred. Please try again later.');
+      handleFirestoreError(error, OperationType.CREATE, path);
     } finally {
       setIsSubmitting(false);
     }

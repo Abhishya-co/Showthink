@@ -28,3 +28,16 @@ export interface Testimonial {
   content: string;
   rating: number;
 }
+
+export interface UserProfile {
+  uid: string;
+  name: string;
+  email: string;
+  photoURL?: string;
+  subscription?: {
+    plan: 'Free' | 'Pro' | 'Enterprise';
+    status: 'active' | 'inactive' | 'canceled';
+    expiresAt?: any;
+  };
+  createdAt: any;
+}

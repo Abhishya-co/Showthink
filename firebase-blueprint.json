@@ -1,0 +1,87 @@
+{
+  "entities": {
+    "Message": {
+      "title": "Contact Message",
+      "description": "A message sent from the contact form.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name of the sender."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address of the sender."
+        },
+        "phone": {
+          "type": "string",
+          "description": "Phone number of the sender."
+        },
+        "service": {
+          "type": "string",
+          "description": "Service the sender is interested in."
+        },
+        "message": {
+          "type": "string",
+          "description": "The message content."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the message was sent."
+        }
+      },
+      "required": ["name", "email", "message", "createdAt"]
+    },
+    "User": {
+      "title": "User Profile",
+      "description": "User profile information stored in Firestore.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the user."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address of the user."
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "URL of the user's profile picture."
+        },
+        "subscription": {
+          "type": "object",
+          "properties": {
+            "plan": { "type": "string", "enum": ["Free", "Pro", "Enterprise"] },
+            "status": { "type": "string", "enum": ["active", "inactive", "canceled"] },
+            "expiresAt": { "type": "string", "format": "date-time" }
+          },
+          "description": "User's subscription details."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the user account was created."
+        }
+      },
+      "required": ["uid", "name", "email", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Collection of contact messages."
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Collection of user profile information."
+    }
+  }
+}
