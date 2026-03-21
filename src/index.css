@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600&family=Poppins:wght@400;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-heading: "Montserrat", "Poppins", sans-serif;
+  --font-body: "Open Sans", sans-serif;
+  --color-brand-black: #0F0F0F;
+  --color-brand-gold: #FFD700;
+  --color-brand-white: #FFFFFF;
+}
+
+@layer base {
+  body {
+    @apply bg-brand-black text-brand-white font-body selection:bg-brand-gold selection:text-brand-black;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl;
+  }
+  .glow-hover {
+    @apply transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,215,0,0.3)] hover:border-brand-gold/50;
+  }
+  .btn-primary {
+    @apply px-8 py-3 bg-brand-gold text-brand-black font-bold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,215,0,0.5)] active:scale-95;
+  }
+  .btn-secondary {
+    @apply px-8 py-3 border-2 border-brand-gold text-brand-gold font-bold rounded-full transition-all duration-300 hover:bg-brand-gold hover:text-brand-black active:scale-95;
+  }
+}
+
+.text-gradient-gold {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-gold via-yellow-200 to-brand-gold;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-brand-black;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-brand-gold/20 rounded-full hover:bg-brand-gold/40 transition-colors;
+}
