@@ -5,14 +5,19 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const LeaderboardBanner = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isClaimed = new URLSearchParams(location.search).get('claimed') === 'true';
+  const isClaimed = new URLSearchParams(location.search).get('claimed') === 'true' || localStorage.getItem('claimed_offer') === 'true';
+
+  const handleClaim = () => {
+    localStorage.setItem('claimed_offer', 'true');
+    navigate('/pricing?claimed=true');
+  };
 
   return (
     <div className="w-full bg-brand-black border-b border-white/5 flex justify-center items-center py-4 px-4 overflow-hidden">
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        onClick={() => navigate('/pricing?claimed=true')}
+        onClick={handleClaim}
         className="relative w-full max-w-[728px] h-[90px] bg-gradient-to-r from-brand-gold/20 to-brand-gold/5 rounded-lg border border-brand-gold/20 flex items-center justify-between px-8 group cursor-pointer overflow-hidden"
       >
         {/* Decorative background elements */}

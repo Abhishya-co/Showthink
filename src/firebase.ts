@@ -5,9 +5,10 @@ import {
   signInWithPopup, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
-  updateProfile
+  updateProfile,
+  signOut
 } from 'firebase/auth';
-import { getFirestore, collection, addDoc, serverTimestamp, doc, getDocFromServer, setDoc, getDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, serverTimestamp, doc, getDocFromServer, setDoc, getDoc, onSnapshot, query, where, getDocs, limit } from 'firebase/firestore';
 
 // Import the Firebase configuration
 import firebaseConfig from '../firebase-applet-config.json';
@@ -28,7 +29,7 @@ export const signInWithGoogle = async () => {
   }
 };
 
-export { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile };
+export { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, signOut };
 
 // Error handling for Firestore
 export enum OperationType {
@@ -94,4 +95,4 @@ async function testConnection() {
 }
 testConnection();
 
-export { collection, addDoc, serverTimestamp, setDoc, doc, getDoc };
+export { collection, addDoc, serverTimestamp, setDoc, doc, getDoc, onSnapshot, query, where, getDocs, limit };

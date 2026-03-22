@@ -6,13 +6,17 @@ import confetti from 'canvas-confetti';
 
 const Pricing = () => {
   const location = useLocation();
-  const isClaimed = new URLSearchParams(location.search).get('claimed') === 'true';
+  const isClaimed = new URLSearchParams(location.search).get('claimed') === 'true' || localStorage.getItem('claimed_offer') === 'true';
   const [showPopup, setShowPopup] = useState(false);
   const standardPlanRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isClaimed) {
+    // Only show popup if it's the first time claiming in this session
+    const hasSeenPopup = sessionStorage.getItem('claimed_popup_seen') === 'true';
+    
+    if (isClaimed && !hasSeenPopup) {
       setShowPopup(true);
+      sessionStorage.setItem('claimed_popup_seen', 'true');
       
       // Auto-close popup after 1 second
       const timer = setTimeout(() => {
@@ -63,11 +67,11 @@ const Pricing = () => {
     },
     {
       name: 'Standard Plan',
-      price: '9,999',
-      originalPrice: '14,284',
+      price: isClaimed ? '9,999' : '14,284',
+      originalPrice: isClaimed ? '14,284' : undefined,
       icon: Star,
       badge: 'Most Popular',
-      offer: 'Special Offer: 30% OFF',
+      offer: isClaimed ? 'Special Offer: 30% OFF Applied' : 'Special Offer: 30% OFF Available',
       features: [
         '8 Pages Website',
         'SEO Optimized',

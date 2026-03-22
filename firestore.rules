@@ -19,32 +19,37 @@ service cloud.firestore {
              data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
              data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
              data.message is string && data.message.size() > 0 && data.message.size() < 5000 &&
+             data.get('phone', '') is string && data.get('phone', '').size() < 20 &&
+             data.get('service', '') is string && data.get('service', '').size() < 100 &&
              data.createdAt is timestamp;
     }
 
     function isValidUser(data) {
-      return data.keys().hasAny(['uid', 'name', 'email', 'photoURL', 'subscription', 'createdAt']) &&
-             data.uid is string && data.uid == request.auth.uid &&
+      return data.uid is string && data.uid == request.auth.uid &&
              data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
              data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
-             (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() < 1000)) &&
+             (
+               !('photoURL' in data) || 
+               data.photoURL == null || 
+               (data.photoURL is string && data.photoURL.size() < 1048576)
+             ) &&
              (!('subscription' in data) || (data.subscription is map && 
                data.subscription.plan in ['Free', 'Pro', 'Enterprise'] &&
                data.subscription.status in ['active', 'inactive', 'canceled'])) &&
-             data.createdAt is timestamp;
+             (!('createdAt' in data) || data.createdAt is timestamp);
     }
 
     // ===============================================================
     // Collection Rules
     // ===============================================================
 
-    match /messages/{messageId} {
-      // Anyone can send a message
-      allow create: if isValidMessage(request.resource.data);
-      // Only admin can read messages
-      allow read: if isAdmin();
-      // No updates or deletes for now
-      allow update, delete: if isAdmin();
+    match /messages/{email} {
+      // Anyone can check if their email has already been used (get)
+      // and anyone can send a new message (create)
+      allow get: if true;
+      allow create: if isValidMessage(request.resource.data) && request.resource.id == request.resource.data.email;
+      // Only admin can list, update or delete messages
+      allow list, update, delete: if isAdmin();
     }
 
     match /users/{userId} {
@@ -56,8 +61,8 @@ service cloud.firestore {
       
       // Users can update their own profile (except sensitive fields if we had any)
       allow update: if isAuthenticated() && request.auth.uid == userId && isValidUser(request.resource.data) &&
-                      (!('subscription' in request.resource.data) || 
-                       !('subscription' in resource.data) || 
+                      (!request.resource.data.keys().hasAny(['subscription']) || 
+                       !resource.data.keys().hasAny(['subscription']) || 
                        request.resource.data.subscription == resource.data.subscription);
       
       // Admins have full access

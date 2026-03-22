@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, User, Camera, Loader2, Check, AlertCircle, CreditCard, Shield, Calendar } from 'lucide-react';
+import { X, User, Camera, Loader2, Check, AlertCircle, CreditCard, Shield, Calendar, LogOut } from 'lucide-react';
 import Cropper from 'react-easy-crop';
+import { useNavigate } from 'react-router-dom';
 import { 
   auth, 
   db, 
@@ -9,6 +10,7 @@ import {
   doc, 
   getDoc,
   updateProfile,
+  signOut,
   handleFirestoreError,
   OperationType
 } from '../firebase';
@@ -36,8 +38,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const [isCropping, setIsCropping] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -105,15 +109,20 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
     setSuccess(false);
 
     try {
-      // 1. Update Auth Profile
-      await updateProfile(auth.currentUser, {
-        displayName: name,
-        photoURL: photoURL
-      });
+      // 1. Update Auth Profile (only if photoURL is short enough)
+      // Firebase Auth photoURL has a limit of ~2000 characters
+      const authUpdate: any = { displayName: name };
+      if (photoURL && photoURL.length < 2000) {
+        authUpdate.photoURL = photoURL;
+      }
+      
+      await updateProfile(auth.currentUser, authUpdate);
 
-      // 2. Update Firestore
+      // 2. Update Firestore (Firestore documents can be up to 1MB, so long URLs are fine here)
       await setDoc(doc(db, 'users', auth.currentUser.uid), {
+        uid: auth.currentUser.uid,
         name: name,
+        email: auth.currentUser.email,
         photoURL: photoURL
       }, { merge: true });
 
@@ -121,7 +130,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
       setTimeout(() => {
         setSuccess(false);
         onClose();
-      }, 1500);
+      }, 1000);
     } catch (err: any) {
       console.error('Profile update error:', err);
       handleFirestoreError(err, OperationType.UPDATE, `users/${auth.currentUser.uid}`);
@@ -245,26 +254,36 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                     <p className="text-[10px] text-white/20 ml-1 italic">Email cannot be changed</p>
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={isLoading || success}
-                    className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
-                      success 
-                        ? 'bg-green-500 text-white' 
-                        : 'bg-brand-gold text-brand-black hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]'
-                    }`}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="animate-spin" size={20} />
-                    ) : success ? (
-                      <>
-                        <Check size={20} /> Profile Updated
-                      </>
-                    ) : (
-                      'Save Changes'
-                    )}
-                  </button>
-                </form>
+                    <button
+                      type="submit"
+                      disabled={isLoading || success}
+                      className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                        success 
+                          ? 'bg-green-500 text-white' 
+                          : 'bg-brand-gold text-brand-black hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]'
+                      }`}
+                    >
+                      {isLoading ? (
+                        <Loader2 className="animate-spin" size={20} />
+                      ) : success ? (
+                        <>
+                          <Check size={20} /> Profile Updated
+                        </>
+                      ) : (
+                        'Save Changes'
+                      )}
+                    </button>
+
+                    <div className="pt-4 border-t border-white/5">
+                      <button
+                        type="button"
+                        onClick={() => setShowLogoutConfirm(true)}
+                        className="w-full py-3 rounded-xl border border-red-500/30 text-red-500 font-bold text-sm hover:bg-red-500/10 transition-all flex items-center justify-center gap-2"
+                      >
+                        <LogOut size={16} /> Logout Account
+                      </button>
+                    </div>
+                  </form>
               ) : (
                 <div className="space-y-6">
                   <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
@@ -311,6 +330,50 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                 </div>
               )}
             </div>
+
+            {/* Logout Confirmation Overlay */}
+            <AnimatePresence>
+              {showLogoutConfirm && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-[130] flex items-center justify-center bg-brand-black/95 p-6 text-center"
+                >
+                  <div className="max-w-xs w-full space-y-6">
+                    <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center text-red-500 mx-auto mb-4">
+                      <LogOut size={32} />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold mb-2">Logout Confirmation</h3>
+                      <p className="text-sm text-white/60">Are you sure you want to log out of your account?</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setShowLogoutConfirm(false)}
+                        className="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 font-bold text-sm hover:bg-white/10 transition-all"
+                      >
+                        No, Stay
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await signOut(auth);
+                            onClose();
+                            navigate('/');
+                          } catch (error) {
+                            console.error('Logout error:', error);
+                          }
+                        }}
+                        className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-all"
+                      >
+                        Yes, Logout
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Cropper Overlay */}
             <AnimatePresence>

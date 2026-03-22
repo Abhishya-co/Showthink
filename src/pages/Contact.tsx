@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { Mail, Phone, MapPin, Send, MessageSquare } from 'lucide-react';
-import { db, collection, addDoc, serverTimestamp, handleFirestoreError, OperationType } from '../firebase';
+import { motion, AnimatePresence } from 'motion/react';
+import { Mail, Phone, MapPin, Send, MessageSquare, AlertCircle, CheckCircle2, X } from 'lucide-react';
+import { db, serverTimestamp, handleFirestoreError, OperationType, doc, getDoc, setDoc } from '../firebase';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -13,23 +13,63 @@ const Contact = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [duplicateError, setDuplicateError] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const checkDuplicate = async (email: string) => {
+    // Using email as document ID for unique constraint
+    const docRef = doc(db, 'messages', email.toLowerCase().trim());
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists();
+  };
+
+  const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    const path = 'messages';
+    setDuplicateError(false);
+
     try {
-      await addDoc(collection(db, path), {
+      const isDuplicate = await checkDuplicate(formData.email);
+      if (isDuplicate) {
+        setDuplicateError(true);
+        setIsSubmitting(false);
+        return;
+      }
+      setIsConfirming(true);
+    } catch (error) {
+      console.error('Error checking duplicate:', error);
+      // If it's a permission error, it might be because the document doesn't exist 
+      // but 'get' is restricted. We'll handle this in firestore.rules.
+      setDuplicateError(false);
+      setIsConfirming(true); 
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleFinalSubmit = async () => {
+    setIsSubmitting(true);
+    setIsConfirming(false);
+    
+    const path = `messages/${formData.email.toLowerCase().trim()}`;
+    try {
+      // Use setDoc with email as ID to enforce uniqueness at the database level
+      await setDoc(doc(db, 'messages', formData.email.toLowerCase().trim()), {
         ...formData,
+        email: formData.email.toLowerCase().trim(),
         createdAt: serverTimestamp()
       });
 
       setSubmitted(true);
       setFormData({ name: '', email: '', phone: '', service: 'Digital Marketing', message: '' });
+      
+      // Auto-reset success message after 1 second
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 1000);
     } catch (error) {
       console.error('Error submitting form:', error);
-      handleFirestoreError(error, OperationType.CREATE, path);
+      handleFirestoreError(error, OperationType.WRITE, path);
     } finally {
       setIsSubmitting(false);
     }
@@ -37,11 +77,87 @@ const Contact = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (duplicateError) setDuplicateError(false);
   };
 
   return (
     <div className="pt-64 pb-24 px-6">
       <div className="max-w-7xl mx-auto">
+        {/* Confirmation Modal */}
+        <AnimatePresence>
+          {isConfirming && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-brand-black/90 backdrop-blur-md">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-lg glass-card p-8 md:p-10 overflow-hidden"
+              >
+                <div className="absolute top-0 left-0 w-full h-1 bg-brand-gold" />
+                <button 
+                  onClick={() => setIsConfirming(false)}
+                  className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors"
+                >
+                  <X size={24} />
+                </button>
+
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="w-12 h-12 bg-brand-gold/20 rounded-xl flex items-center justify-center text-brand-gold">
+                    <CheckCircle2 size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold">Confirm Details</h3>
+                    <p className="text-sm text-white/40">Please review your information before sending.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-6 mb-10">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">Name</p>
+                      <p className="font-medium">{formData.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">Email</p>
+                      <p className="font-medium truncate">{formData.email}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">Phone</p>
+                      <p className="font-medium">{formData.phone}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">Service</p>
+                      <p className="font-medium">{formData.service}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">Message</p>
+                    <p className="text-sm text-white/70 line-clamp-4">{formData.message}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setIsConfirming(false)}
+                    className="flex-1 py-4 rounded-xl bg-white/5 border border-white/10 font-bold hover:bg-white/10 transition-all"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={handleFinalSubmit}
+                    disabled={isSubmitting}
+                    className="flex-1 py-4 rounded-xl bg-brand-gold text-brand-black font-bold hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting ? 'Sending...' : 'Confirm & Send'}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
         <div className="text-center mb-20">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -179,7 +295,18 @@ const Contact = () => {
                   </motion.button>
                 </motion.div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleInitialSubmit} className="space-y-6">
+                  {duplicateError && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 flex items-center gap-3"
+                    >
+                      <AlertCircle size={20} />
+                      <p className="text-sm font-bold">Already submitted form with this email address.</p>
+                    </motion.div>
+                  )}
+
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-white/60">Full Name</label>
@@ -202,7 +329,9 @@ const Contact = () => {
                         value={formData.email}
                         onChange={handleChange}
                         placeholder="john@example.com"
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-gold transition-colors"
+                        className={`w-full bg-white/5 border rounded-xl px-6 py-4 focus:outline-none transition-colors ${
+                          duplicateError ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-brand-gold'
+                        }`}
                       />
                     </div>
                   </div>
@@ -254,7 +383,7 @@ const Contact = () => {
                     disabled={isSubmitting}
                     className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isSubmitting ? 'Sending...' : (
+                    {isSubmitting ? 'Checking...' : (
                       <>
                         Send Message <Send size={20} />
                       </>
