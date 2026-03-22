@@ -19,7 +19,7 @@ const Portfolio = () => {
   };
 
   return (
-    <div className="pt-64 pb-24 px-6">
+    <div className="pt-32 pb-24 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <motion.h1
@@ -27,7 +27,7 @@ const Portfolio = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-5xl md:text-7xl font-extrabold mb-6"
           >
-            Our <span className="text-gradient-gold">Work</span>
+            Our <span className="text-gradient-yellow">Work</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -47,7 +47,7 @@ const Portfolio = () => {
               onClick={() => setFilter(cat as any)}
               className={`px-8 py-2 rounded-full font-bold transition-all duration-300 flex items-center gap-2 ${
                 filter === cat 
-                  ? 'bg-brand-gold text-brand-black shadow-[0_0_15px_rgba(255,215,0,0.3)]' 
+                  ? 'bg-brand-yellow text-brand-black shadow-[0_0_15px_rgba(255,215,0,0.3)]' 
                   : 'bg-white/5 text-white/60 hover:bg-white/10'
               }`}
             >
@@ -84,11 +84,11 @@ const Portfolio = () => {
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-8">
-                  <span className="text-brand-gold text-xs font-bold uppercase tracking-widest mb-2">{project.category}</span>
+                  <span className="text-brand-yellow text-xs font-bold uppercase tracking-widest mb-2">{project.category}</span>
                   <h3 className="text-2xl font-bold mb-2">{project.title}</h3>
                   <p className="text-white/60 text-sm mb-6 line-clamp-2">{project.description}</p>
                   <div className="flex items-center gap-4">
-                    <button className="text-sm font-bold flex items-center gap-2 text-white hover:text-brand-gold transition-colors">
+                    <button className="text-sm font-bold flex items-center gap-2 text-white hover:text-brand-yellow transition-colors">
                       View Details <ArrowRight size={16} />
                     </button>
                     {project.link && (
@@ -96,7 +96,7 @@ const Portfolio = () => {
                         href={project.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-bold flex items-center gap-2 text-white hover:text-brand-gold transition-colors"
+                        className="text-sm font-bold flex items-center gap-2 text-white hover:text-brand-yellow transition-colors"
                       >
                         Live Link <ExternalLink size={16} />
                       </a>

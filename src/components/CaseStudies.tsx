@@ -6,16 +6,16 @@ import { Link } from 'react-router-dom';
 
 const CaseStudies = () => {
   return (
-    <section className="py-24 px-6 bg-brand-black relative">
+    <section className="py-16 px-6 bg-brand-black relative">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-20">
+        <div className="text-center mb-12">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-4xl md:text-5xl font-extrabold mb-6"
           >
-            Success <span className="text-gradient-gold">Stories</span>
+            Success <span className="text-gradient-yellow">Stories</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -36,7 +36,7 @@ const CaseStudies = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="glass-card overflow-hidden group hover:border-brand-gold/30 transition-all duration-500 flex flex-col"
+              className="glass-card overflow-hidden group hover:border-brand-yellow/30 transition-all duration-500 flex flex-col"
             >
               {/* Before/After Visuals */}
               <div className="relative h-64 overflow-hidden flex">
@@ -58,7 +58,7 @@ const CaseStudies = () => {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute top-4 right-4 px-3 py-1 bg-brand-gold text-brand-black text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg">
+                  <div className="absolute top-4 right-4 px-3 py-1 bg-brand-yellow text-brand-black text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg">
                     After
                   </div>
                 </div>
@@ -68,7 +68,7 @@ const CaseStudies = () => {
               <div className="p-8 flex-grow flex flex-col">
                 <div className="flex justify-between items-start mb-6">
                   <div>
-                    <span className="text-brand-gold text-xs font-bold uppercase tracking-widest mb-1 block">
+                    <span className="text-brand-yellow text-xs font-bold uppercase tracking-widest mb-1 block">
                       {study.category}
                     </span>
                     <h3 className="text-2xl font-bold">{study.client}</h3>
@@ -87,7 +87,7 @@ const CaseStudies = () => {
                   </div>
 
                   <div className="flex gap-4">
-                    <div className="w-10 h-10 bg-brand-gold/10 text-brand-gold rounded-xl flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 bg-brand-yellow/10 text-brand-yellow rounded-xl flex items-center justify-center shrink-0">
                       <CheckCircle2 size={20} />
                     </div>
                     <div>
@@ -109,7 +109,7 @@ const CaseStudies = () => {
 
                 <Link
                   to="/portfolio"
-                  className="w-full py-4 rounded-xl bg-white/5 border border-white/10 font-bold flex items-center justify-center gap-2 group-hover:bg-brand-gold group-hover:text-brand-black transition-all duration-300"
+                  className="w-full py-4 rounded-xl bg-white/5 border border-white/10 font-bold flex items-center justify-center gap-2 group-hover:bg-brand-yellow group-hover:text-brand-black transition-all duration-300"
                 >
                   View Full Case Study <ArrowRight size={18} />
                 </Link>

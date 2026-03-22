@@ -1,34 +1,61 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { auth } from '../firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const LeaderboardBanner = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isClaimed = new URLSearchParams(location.search).get('claimed') === 'true' || localStorage.getItem('claimed_offer') === 'true';
+  const [isClaimed, setIsClaimed] = useState(false);
 
-  const handleClaim = () => {
+  useEffect(() => {
+    // Initial check from URL or localStorage
+    const urlClaimed = new URLSearchParams(location.search).get('claimed') === 'true';
+    const localClaimed = localStorage.getItem('claimed_offer') === 'true';
+    
+    if (urlClaimed || localClaimed) {
+      setIsClaimed(true);
+    }
+
+    // Listen for auth changes to reset on logout
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // User logged out, reset claim status
+        setIsClaimed(false);
+        localStorage.removeItem('claimed_offer');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [location.search]);
+
+  const handleClaim = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsClaimed(true);
     localStorage.setItem('claimed_offer', 'true');
-    navigate('/pricing?claimed=true');
+    // Optional: navigate to pricing after a short delay to show "Congratulations"
+    setTimeout(() => {
+      navigate('/pricing?claimed=true');
+    }, 1500);
   };
 
   return (
-    <div className="w-full bg-brand-black border-b border-white/5 flex justify-center items-center py-4 px-4 overflow-hidden">
+    <div className="w-full flex justify-center items-center overflow-hidden">
       <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        onClick={handleClaim}
-        className="relative w-full max-w-[728px] h-[90px] bg-gradient-to-r from-brand-gold/20 to-brand-gold/5 rounded-lg border border-brand-gold/20 flex items-center justify-between px-8 group cursor-pointer overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="relative w-full min-h-[100px] bg-gradient-to-r from-brand-yellow/20 to-brand-yellow/5 border-y border-brand-yellow/20 flex flex-col sm:flex-row items-center justify-between p-4 sm:px-12 group cursor-default overflow-hidden"
       >
         {/* Decorative background elements */}
-        <div className="absolute top-0 right-0 w-32 h-full bg-brand-gold/10 skew-x-[-20deg] translate-x-10 group-hover:translate-x-5 transition-transform duration-500" />
+        <div className="absolute top-0 right-0 w-32 h-full bg-brand-yellow/10 skew-x-[-20deg] translate-x-10 group-hover:translate-x-5 transition-transform duration-500" />
         
         <div className="relative z-10 flex items-center gap-6">
-          <div className="hidden sm:flex w-12 h-12 bg-brand-gold rounded-full items-center justify-center text-brand-black font-bold text-xl shadow-lg shadow-brand-gold/20">
+          <div className="hidden sm:flex w-12 h-12 bg-brand-yellow rounded-full items-center justify-center text-brand-black font-bold text-xl shadow-lg shadow-brand-yellow/20">
             %
           </div>
           <div>
-            <h3 className="text-brand-gold font-bold text-lg sm:text-xl leading-tight">
+            <h3 className="text-brand-yellow font-bold text-lg sm:text-xl leading-tight">
               Special Offer: 30% OFF
             </h3>
             <p className="text-white/60 text-xs sm:text-sm">
@@ -38,10 +65,13 @@ const LeaderboardBanner = () => {
         </div>
 
         <div className="relative z-10">
-          <button className={`bg-brand-gold text-brand-black px-4 sm:px-6 py-1.5 sm:py-2 rounded-full font-bold text-xs sm:text-sm transition-all ${
+          <button 
+            onClick={handleClaim}
+            disabled={isClaimed}
+            className={`bg-brand-yellow text-brand-black px-4 sm:px-6 py-1.5 sm:py-2 rounded-full font-bold text-xs sm:text-sm transition-all ${
             isClaimed 
-              ? 'animate-pulse shadow-[0_0_15px_rgba(255,215,0,0.6)] scale-110' 
-              : 'hover:scale-105'
+              ? 'animate-pulse shadow-[0_0_15px_rgba(255,215,0,0.6)] scale-110 cursor-default' 
+              : 'hover:scale-105 cursor-pointer active:scale-95'
           }`}>
             {isClaimed ? 'Congratulations!' : 'Claim Now'}
           </button>

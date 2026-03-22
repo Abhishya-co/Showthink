@@ -6,6 +6,7 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   updateProfile,
+  sendPasswordResetEmail,
   auth,
   db,
   setDoc,
@@ -24,7 +25,9 @@ interface AuthModalProps {
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
@@ -37,7 +40,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initi
   React.useEffect(() => {
     if (isOpen) {
       setIsLogin(initialMode === 'login');
+      setIsForgotPassword(false);
       setError(null);
+      setSuccessMessage(null);
       setFormData({ name: '', email: '', password: '' });
     }
   }, [isOpen, initialMode]);
@@ -94,8 +99,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initi
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSuccessMessage(null);
 
     try {
+      if (isForgotPassword) {
+        await sendPasswordResetEmail(auth, formData.email);
+        setSuccessMessage('Password reset email sent! Please check your inbox.');
+        return;
+      }
+
       if (isLogin) {
         await signInWithEmailAndPassword(auth, formData.email, formData.password);
       } else {
@@ -133,7 +145,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initi
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             className="relative w-full max-w-md glass-card p-6 md:p-8 overflow-hidden"
           >
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-gold to-transparent" />
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-yellow to-transparent" />
             
             <button
               onClick={onClose}
@@ -144,28 +156,36 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initi
 
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold mb-4">
-                {isLogin ? 'Welcome Back' : 'Join Showthink'}
+                {isForgotPassword ? 'Reset Password' : (isLogin ? 'Welcome Back' : 'Join Showthink')}
               </h2>
               
               {/* Tabs */}
-              <div className="flex p-1 bg-white/5 rounded-xl border border-white/10 mb-6">
-                <button
-                  onClick={() => setIsLogin(true)}
-                  className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${
-                    isLogin ? 'bg-brand-gold text-brand-black shadow-lg' : 'text-white/60 hover:text-white'
-                  }`}
-                >
-                  Sign In
-                </button>
-                <button
-                  onClick={() => setIsLogin(false)}
-                  className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${
-                    !isLogin ? 'bg-brand-gold text-brand-black shadow-lg' : 'text-white/60 hover:text-white'
-                  }`}
-                >
-                  Sign Up
-                </button>
-              </div>
+              {!isForgotPassword && (
+                <div className="flex p-1 bg-white/5 rounded-xl border border-white/10 mb-6">
+                  <button
+                    onClick={() => setIsLogin(true)}
+                    className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${
+                      isLogin ? 'bg-brand-yellow text-brand-black shadow-lg' : 'text-white/60 hover:text-white'
+                    }`}
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => setIsLogin(false)}
+                    className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${
+                      !isLogin ? 'bg-brand-yellow text-brand-black shadow-lg' : 'text-white/60 hover:text-white'
+                    }`}
+                  >
+                    Sign Up
+                  </button>
+                </div>
+              )}
+
+              {isForgotPassword && (
+                <p className="text-sm text-white/60 mb-6">
+                  Enter your email address and we'll send you a link to reset your password.
+                </p>
+              )}
             </div>
 
             {error && (
@@ -174,8 +194,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initi
               </div>
             )}
 
+            {successMessage && (
+              <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs text-center">
+                {successMessage}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-3">
-              {!isLogin && (
+              {!isLogin && !isForgotPassword && (
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-white/40 ml-1 uppercase tracking-wider">Full Name</label>
                   <div className="relative">
@@ -184,7 +210,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initi
                       required
                       type="text"
                       placeholder="John Doe"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-white focus:border-brand-gold/50 focus:outline-none transition-all"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-white focus:border-brand-yellow/50 focus:outline-none transition-all"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     />
@@ -200,27 +226,40 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initi
                     required
                     type="email"
                     placeholder="john@example.com"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-white focus:border-brand-gold/50 focus:outline-none transition-all"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-white focus:border-brand-yellow/50 focus:outline-none transition-all"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-white/40 ml-1 uppercase tracking-wider">Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
-                  <input
-                    required
-                    type="password"
-                    placeholder="••••••••"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-white focus:border-brand-gold/50 focus:outline-none transition-all"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  />
+              {!isForgotPassword && (
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center ml-1">
+                    <label className="text-xs font-bold text-white/40 uppercase tracking-wider">Password</label>
+                    {isLogin && (
+                      <button
+                        type="button"
+                        onClick={() => setIsForgotPassword(true)}
+                        className="text-[10px] text-brand-yellow hover:underline font-bold uppercase tracking-wider"
+                      >
+                        Forgot Password?
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
+                    <input
+                      required
+                      type="password"
+                      placeholder="••••••••"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-white focus:border-brand-yellow/50 focus:outline-none transition-all"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <button
                 type="submit"
@@ -231,39 +270,55 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initi
                   <Loader2 className="animate-spin" size={20} />
                 ) : (
                   <>
-                    {isLogin ? 'Sign In' : 'Sign Up'} <ArrowRight size={20} />
+                    {isForgotPassword ? 'Send Reset Link' : (isLogin ? 'Sign In' : 'Sign Up')} <ArrowRight size={20} />
                   </>
                 )}
               </button>
             </form>
 
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/10"></div>
-              </div>
-              <div className="relative flex justify-center text-[10px] uppercase">
-                <span className="bg-brand-black px-4 text-white/40 font-bold tracking-widest">Or continue with</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleGoogleLogin}
-              disabled={isLoading}
-              className="w-full py-3 rounded-xl bg-white text-brand-black font-bold flex items-center justify-center gap-3 hover:bg-white/90 transition-all text-sm"
-            >
-              <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
-              Sign in with Google
-            </button>
-
-            <p className="text-center mt-6 text-sm text-white/40">
-              {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
+            {isForgotPassword && (
               <button
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-brand-gold font-bold hover:underline"
+                onClick={() => setIsForgotPassword(false)}
+                className="w-full text-center mt-4 text-xs text-brand-yellow font-bold hover:underline uppercase tracking-wider"
               >
-                {isLogin ? 'Create one' : 'Sign in'}
+                Back to Sign In
               </button>
-            </p>
+            )}
+
+            {!isForgotPassword && (
+              <>
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/10"></div>
+                  </div>
+                  <div className="relative flex justify-center text-[10px] uppercase">
+                    <span className="bg-brand-black px-4 text-white/40 font-bold tracking-widest">Or continue with</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleGoogleLogin}
+                  disabled={isLoading}
+                  className="w-full py-3 rounded-xl bg-white text-brand-black font-bold flex items-center justify-center gap-3 hover:bg-white/90 transition-all text-sm"
+                >
+                  <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
+                  Sign in with Google
+                </button>
+
+                <p className="text-center mt-6 text-sm text-white/40">
+                  {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
+                  <button
+                    onClick={() => {
+                      setIsLogin(!isLogin);
+                      setIsForgotPassword(false);
+                    }}
+                    className="text-brand-yellow font-bold hover:underline"
+                  >
+                    {isLogin ? 'Create one' : 'Sign in'}
+                  </button>
+                </p>
+              </>
+            )}
           </motion.div>
         </div>
       )}

@@ -7,9 +7,9 @@ const VideoSection = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <section className="py-24 px-6 bg-brand-black relative overflow-hidden">
+    <section className="py-16 px-6 bg-brand-black relative overflow-hidden">
       {/* Background Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-gold/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-yellow/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10 text-center">
         <motion.div
@@ -19,7 +19,7 @@ const VideoSection = () => {
           className="mb-12"
         >
           <h2 className="text-4xl md:text-6xl font-extrabold mb-6">
-            See How <span className="text-gradient-gold">Showthink</span> Helps You Grow
+            See How <span className="text-gradient-yellow">Showthink</span> Helps You Grow
           </h2>
           <p className="text-xl text-white/60 max-w-2xl mx-auto">
             Watch our 60-second intro to discover how we transform businesses through strategic digital solutions.
@@ -43,8 +43,8 @@ const VideoSection = () => {
             />
             <div className="absolute inset-0 bg-brand-black/40 group-hover:bg-brand-black/20 transition-colors duration-300 flex items-center justify-center">
               <div className="relative">
-                <div className="absolute inset-0 bg-brand-gold rounded-full blur-xl opacity-50 group-hover:opacity-80 transition-opacity animate-pulse" />
-                <div className="w-20 h-20 md:w-24 md:h-24 bg-brand-gold rounded-full flex items-center justify-center text-brand-black relative z-10 transform group-hover:scale-110 transition-transform duration-300">
+                <div className="absolute inset-0 bg-brand-yellow rounded-full blur-xl opacity-50 group-hover:opacity-80 transition-opacity animate-pulse" />
+                <div className="w-20 h-20 md:w-24 md:h-24 bg-brand-yellow rounded-full flex items-center justify-center text-brand-black relative z-10 transform group-hover:scale-110 transition-transform duration-300">
                   <Play size={32} fill="currentColor" className="ml-1" />
                 </div>
               </div>
@@ -57,7 +57,7 @@ const VideoSection = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 className="glass-card p-4 md:p-6 inline-block backdrop-blur-xl border-white/20"
               >
-                <p className="text-brand-gold font-bold text-sm uppercase tracking-widest mb-1">Intro Video</p>
+                <p className="text-brand-yellow font-bold text-sm uppercase tracking-widest mb-1">Intro Video</p>
                 <h3 className="text-xl md:text-2xl font-bold">Strategic Growth & Digital Excellence</h3>
               </motion.div>
             </div>

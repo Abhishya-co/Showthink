@@ -7,7 +7,7 @@ import { ArrowRight } from 'lucide-react';
 
 const Services = () => {
   return (
-    <div className="pt-64 pb-24 px-6">
+    <div className="pt-32 pb-24 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-20">
           <motion.h1
@@ -15,7 +15,7 @@ const Services = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-5xl md:text-7xl font-extrabold mb-6"
           >
-            Our <span className="text-gradient-gold">Expertise</span>
+            Our <span className="text-gradient-yellow">Expertise</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -42,13 +42,13 @@ const Services = () => {
                   to={`/services/${service.id}`}
                   className="group block p-10 glass-card glow-hover h-full relative overflow-hidden"
                 >
-                  <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-gold/5 rounded-full blur-3xl group-hover:bg-brand-gold/10 transition-all" />
+                  <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-yellow/5 rounded-full blur-3xl group-hover:bg-brand-yellow/10 transition-all" />
                   
-                  <div className="w-16 h-16 bg-brand-gold/10 rounded-2xl flex items-center justify-center text-brand-gold mb-8 group-hover:bg-brand-gold group-hover:text-brand-black transition-all duration-300">
+                  <div className="w-16 h-16 bg-brand-yellow/10 rounded-2xl flex items-center justify-center text-brand-yellow mb-8 group-hover:bg-brand-yellow group-hover:text-brand-black transition-all duration-300">
                     <IconComponent size={40} />
                   </div>
                   
-                  <h2 className="text-3xl font-bold mb-6 group-hover:text-brand-gold transition-colors">
+                  <h2 className="text-3xl font-bold mb-6 group-hover:text-brand-yellow transition-colors">
                     {service.title}
                   </h2>
                   
@@ -59,13 +59,13 @@ const Services = () => {
                   <div className="space-y-4 mb-10">
                     {service.features.map((feature, i) => (
                       <div key={i} className="flex items-center gap-3 text-white/60">
-                        <div className="w-1.5 h-1.5 bg-brand-gold rounded-full" />
+                        <div className="w-1.5 h-1.5 bg-brand-yellow rounded-full" />
                         <span>{feature}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="flex items-center gap-2 text-brand-gold font-bold group-hover:translate-x-2 transition-transform">
+                  <div className="flex items-center gap-2 text-brand-yellow font-bold group-hover:translate-x-2 transition-transform">
                     View Service Details <ArrowRight size={20} />
                   </div>
                 </Link>

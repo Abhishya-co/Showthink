@@ -36,13 +36,13 @@ const FAQItem = ({ question, answer, isOpen, onClick }: FAQItemProps) => {
         onClick={onClick}
         className="w-full py-6 px-4 flex items-center justify-between text-left group"
       >
-        <span className={`text-lg font-bold transition-colors ${isOpen ? 'text-brand-gold' : 'text-white/80 group-hover:text-white'}`}>
+        <span className={`text-lg font-bold transition-colors ${isOpen ? 'text-brand-yellow' : 'text-white/80 group-hover:text-white'}`}>
           {question}
         </span>
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.3 }}
-          className={`${isOpen ? 'text-brand-gold' : 'text-white/40'}`}
+          className={`${isOpen ? 'text-brand-yellow' : 'text-white/40'}`}
         >
           <ChevronDown size={24} />
         </motion.div>
@@ -70,14 +70,14 @@ const FAQ = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section className="py-24 px-6 bg-brand-black">
+    <section className="py-16 px-6 bg-brand-black">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-gold/10 border border-brand-gold/20 text-brand-gold text-sm font-bold mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-yellow/10 border border-brand-yellow/20 text-brand-yellow text-sm font-bold mb-6"
           >
             <HelpCircle size={16} />
             Common Questions
@@ -89,7 +89,7 @@ const FAQ = () => {
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-5xl font-extrabold mb-6"
           >
-            Frequently Asked <span className="text-gradient-gold">Questions</span>
+            Frequently Asked <span className="text-gradient-yellow">Questions</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}

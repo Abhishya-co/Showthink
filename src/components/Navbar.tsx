@@ -13,8 +13,6 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-import LeaderboardBanner from './LeaderboardBanner';
-
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -82,7 +80,6 @@ const Navbar = () => {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50">
-      <LeaderboardBanner />
       <nav
         className={cn(
           'transition-all duration-300 px-6 py-4',
@@ -91,11 +88,14 @@ const Navbar = () => {
       >
         <div className="max-w-7xl mx-auto flex justify-between items-center">
         <Link to="/" onClick={() => handleLinkClick('/')} className="flex items-center gap-2 group">
-          <div className="w-10 h-10 bg-brand-gold rounded-lg flex items-center justify-center group-hover:rotate-12 transition-transform">
-            <Zap className="text-brand-black fill-brand-black" size={24} />
-          </div>
+          <img 
+            src="https://encouraging-magenta-8xwytk2odx.edgeone.app/Picsart_26-03-22_15-15-37-168.png" 
+            alt="Showthink Logo" 
+            className="h-10 w-auto object-contain"
+            referrerPolicy="no-referrer"
+          />
           <span className="text-2xl font-extrabold tracking-tighter">
-            SHOW<span className="text-brand-gold">THINK</span>
+            SHOW<span className="text-brand-yellow">THINK</span>
           </span>
         </Link>
 
@@ -107,8 +107,8 @@ const Navbar = () => {
               to={link.path}
               onClick={() => handleLinkClick(link.path)}
               className={cn(
-                'text-sm font-semibold transition-colors hover:text-brand-gold',
-                location.pathname === link.path ? 'text-brand-gold' : 'text-white/70'
+                'text-sm font-semibold transition-colors hover:text-brand-yellow',
+                location.pathname === link.path ? 'text-brand-yellow' : 'text-white/70'
               )}
             >
               {link.name}
@@ -124,9 +124,9 @@ const Navbar = () => {
                 {(profileData?.photoURL || user.photoURL) ? (
                   <img src={profileData?.photoURL || user.photoURL || ''} alt={profileData?.name || user.displayName || ''} className="w-6 h-6 rounded-full object-cover" />
                 ) : (
-                  <User size={16} className="text-brand-gold" />
+                  <User size={16} className="text-brand-yellow" />
                 )}
-                <span className="text-xs font-bold truncate max-w-[100px] group-hover:text-brand-gold transition-colors">
+                <span className="text-xs font-bold truncate max-w-[100px] group-hover:text-brand-yellow transition-colors">
                   {(profileData?.name || user.displayName)?.split(' ')[0] || 'User'}
                 </span>
               </button>
@@ -164,7 +164,7 @@ const Navbar = () => {
                   onClick={() => handleLinkClick(link.path)}
                   className={cn(
                     'text-lg font-semibold',
-                    location.pathname === link.path ? 'text-brand-gold' : 'text-white'
+                    location.pathname === link.path ? 'text-brand-yellow' : 'text-white'
                   )}
                 >
                   {link.name}
@@ -183,13 +183,13 @@ const Navbar = () => {
                     {(profileData?.photoURL || user.photoURL) ? (
                       <img src={profileData?.photoURL || user.photoURL || ''} alt={profileData?.name || user.displayName || ''} className="w-10 h-10 rounded-full object-cover" />
                     ) : (
-                      <User size={24} className="text-brand-gold" />
+                      <User size={24} className="text-brand-yellow" />
                     )}
                     <div className="flex-1">
                       <div className="font-bold">{profileData?.name || user.displayName || 'User'}</div>
                       <div className="text-xs text-white/40">{user.email}</div>
                     </div>
-                    <div className="text-brand-gold text-[10px] font-bold uppercase tracking-widest">Edit</div>
+                    <div className="text-brand-yellow text-[10px] font-bold uppercase tracking-widest">Edit</div>
                   </div>
                 </div>
               ) : (

@@ -20,10 +20,10 @@ const FreeAudit = () => {
   };
 
   return (
-    <section className="py-24 px-6 bg-brand-black relative overflow-hidden">
+    <section className="py-16 px-6 bg-brand-black relative overflow-hidden">
       {/* Decorative Elements */}
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-brand-gold/5 blur-[120px] rounded-full -mr-20" />
-      <div className="absolute bottom-0 left-0 w-1/4 h-1/2 bg-brand-gold/5 blur-[100px] rounded-full -ml-20" />
+      <div className="absolute top-0 right-0 w-1/3 h-full bg-brand-yellow/5 blur-[120px] rounded-full -mr-20" />
+      <div className="absolute bottom-0 left-0 w-1/4 h-1/2 bg-brand-yellow/5 blur-[100px] rounded-full -ml-20" />
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -33,12 +33,12 @@ const FreeAudit = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-gold/10 border border-brand-gold/20 text-brand-gold text-sm font-bold mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-yellow/10 border border-brand-yellow/20 text-brand-yellow text-sm font-bold mb-6">
               <Search size={16} />
               Free Performance Check
             </div>
             <h2 className="text-4xl md:text-5xl font-extrabold mb-8 leading-tight">
-              Get Your <span className="text-gradient-gold">Free Website Audit</span>
+              Get Your <span className="text-gradient-yellow">Free Website Audit</span>
             </h2>
             <p className="text-xl text-white/60 mb-10 leading-relaxed">
               Is your website underperforming? Let our experts take a deep dive into your digital presence and provide actionable insights.
@@ -51,7 +51,7 @@ const FreeAudit = () => {
                 'Help increase organic traffic with SEO tips'
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-4">
-                  <div className="w-6 h-6 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold shrink-0 mt-1">
+                  <div className="w-6 h-6 rounded-full bg-brand-yellow/20 flex items-center justify-center text-brand-yellow shrink-0 mt-1">
                     <CheckCircle2 size={16} />
                   </div>
                   <span className="text-white/80 font-medium">{item}</span>
@@ -60,7 +60,7 @@ const FreeAudit = () => {
             </ul>
 
             <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-brand-gold/10 flex items-center justify-center text-brand-gold">
+              <div className="w-12 h-12 rounded-xl bg-brand-yellow/10 flex items-center justify-center text-brand-yellow">
                 <AlertCircle size={24} />
               </div>
               <div>
@@ -99,7 +99,7 @@ const FreeAudit = () => {
                       required
                       type="text"
                       placeholder="John Doe"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white focus:border-brand-gold/50 focus:outline-none transition-all"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white focus:border-brand-yellow/50 focus:outline-none transition-all"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     />
@@ -114,7 +114,7 @@ const FreeAudit = () => {
                       required
                       type="email"
                       placeholder="john@example.com"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white focus:border-brand-gold/50 focus:outline-none transition-all"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white focus:border-brand-yellow/50 focus:outline-none transition-all"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     />
@@ -129,7 +129,7 @@ const FreeAudit = () => {
                       required
                       type="url"
                       placeholder="https://yourwebsite.com"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white focus:border-brand-gold/50 focus:outline-none transition-all"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white focus:border-brand-yellow/50 focus:outline-none transition-all"
                       value={formData.website}
                       onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                     />
@@ -138,7 +138,7 @@ const FreeAudit = () => {
 
                 <button
                   type="submit"
-                  className="w-full btn-primary py-5 text-lg font-bold shadow-[0_10px_30px_rgba(212,175,55,0.3)] hover:shadow-[0_15px_40px_rgba(212,175,55,0.5)] transition-all"
+                  className="w-full btn-primary py-5 text-lg font-bold shadow-[0_10px_30px_rgba(255,215,0,0.3)] hover:shadow-[0_15px_40px_rgba(255,215,0,0.5)] transition-all"
                 >
                   Get Free Audit
                 </button>

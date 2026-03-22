@@ -63,15 +63,15 @@ const Blog = () => {
     : blogPosts.filter(post => post.category === activeCategory);
 
   return (
-    <section className="py-24 px-6 bg-brand-black">
+    <section className="py-16 px-6 bg-brand-black">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8">
           <div className="max-w-2xl">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-gold/10 border border-brand-gold/20 text-brand-gold text-sm font-bold mb-6"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-yellow/10 border border-brand-yellow/20 text-brand-yellow text-sm font-bold mb-6"
             >
               <BookOpen size={16} />
               Our Blog
@@ -83,7 +83,7 @@ const Blog = () => {
               transition={{ delay: 0.1 }}
               className="text-4xl md:text-6xl font-extrabold mb-6"
             >
-              Latest <span className="text-gradient-gold">Insights</span> & News
+              Latest <span className="text-gradient-yellow">Insights</span> & News
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -103,7 +103,7 @@ const Blog = () => {
                 onClick={() => setActiveCategory(category)}
                 className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 border ${
                   activeCategory === category
-                    ? 'bg-brand-gold border-brand-gold text-brand-black'
+                    ? 'bg-brand-yellow border-brand-yellow text-brand-black'
                     : 'bg-white/5 border-white/10 text-white/60 hover:border-white/30 hover:text-white'
                 }`}
               >
@@ -136,7 +136,7 @@ const Blog = () => {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 rounded-full bg-brand-black/80 backdrop-blur-md text-brand-gold text-xs font-bold border border-brand-gold/30">
+                    <span className="px-3 py-1 rounded-full bg-brand-black/80 backdrop-blur-md text-brand-yellow text-xs font-bold border border-brand-yellow/30">
                       {post.category}
                     </span>
                   </div>
@@ -147,14 +147,14 @@ const Blog = () => {
                     <Calendar size={14} />
                     {post.date}
                   </div>
-                  <h3 className="text-2xl font-bold mb-4 group-hover:text-brand-gold transition-colors line-clamp-2">
+                  <h3 className="text-2xl font-bold mb-4 group-hover:text-brand-yellow transition-colors line-clamp-2">
                     {post.title}
                   </h3>
                   <p className="text-white/60 mb-8 line-clamp-3 text-sm leading-relaxed">
                     {post.excerpt}
                   </p>
                   <div className="mt-auto">
-                    <button className="flex items-center gap-2 text-brand-gold font-bold group/btn">
+                    <button className="flex items-center gap-2 text-brand-yellow font-bold group/btn">
                       Read More
                       <ArrowRight size={18} className="transition-transform group-hover/btn:translate-x-2" />
                     </button>
@@ -169,7 +169,7 @@ const Blog = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-16 text-center"
+          className="mt-12 text-center"
         >
           <button className="px-8 py-4 rounded-full bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all">
             View All Articles

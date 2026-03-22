@@ -158,7 +158,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             className="relative w-full max-w-md glass-card p-6 md:p-8 overflow-hidden flex flex-col max-h-[90vh]"
           >
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-gold to-transparent" />
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-blue to-transparent" />
             
             <button
               onClick={onClose}
@@ -175,7 +175,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                 <button
                   onClick={() => setActiveTab('profile')}
                   className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${
-                    activeTab === 'profile' ? 'bg-brand-gold text-brand-black' : 'text-white/60 hover:text-white'
+                    activeTab === 'profile' ? 'bg-brand-blue text-brand-white' : 'text-white/60 hover:text-white'
                   }`}
                 >
                   <User size={14} /> Profile
@@ -183,7 +183,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                 <button
                   onClick={() => setActiveTab('subscription')}
                   className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${
-                    activeTab === 'subscription' ? 'bg-brand-gold text-brand-black' : 'text-white/60 hover:text-white'
+                    activeTab === 'subscription' ? 'bg-brand-blue text-brand-white' : 'text-white/60 hover:text-white'
                   }`}
                 >
                   <CreditCard size={14} /> Subscription
@@ -197,7 +197,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                   {/* Profile Image Section */}
                   <div className="flex flex-col items-center gap-4">
                     <div className="relative group">
-                      <div className="w-24 h-24 rounded-full border-2 border-brand-gold/30 overflow-hidden bg-white/5 flex items-center justify-center">
+                      <div className="w-24 h-24 rounded-full border-2 border-brand-blue/30 overflow-hidden bg-white/5 flex items-center justify-center">
                         {photoURL ? (
                           <img src={photoURL} alt="Profile" className="w-full h-full object-cover" />
                         ) : (
@@ -207,7 +207,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="absolute bottom-0 right-0 w-8 h-8 bg-brand-gold rounded-full flex items-center justify-center text-brand-black shadow-lg hover:scale-110 transition-transform"
+                        className="absolute bottom-0 right-0 w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center text-brand-white shadow-lg hover:scale-110 transition-transform"
                       >
                         <Camera size={16} />
                       </button>
@@ -236,7 +236,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                         required
                         type="text"
                         placeholder="Your Name"
-                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-white focus:border-brand-gold/50 focus:outline-none transition-all"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-white focus:border-brand-blue/50 focus:outline-none transition-all"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                       />
@@ -260,7 +260,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                       className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
                         success 
                           ? 'bg-green-500 text-white' 
-                          : 'bg-brand-gold text-brand-black hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]'
+                          : 'bg-brand-blue text-brand-white hover:shadow-[0_0_20px_rgba(37,99,235,0.3)]'
                       }`}
                     >
                       {isLoading ? (
@@ -289,7 +289,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                   <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-brand-gold/20 flex items-center justify-center text-brand-gold">
+                        <div className="w-10 h-10 rounded-xl bg-brand-blue/20 flex items-center justify-center text-brand-blue">
                           <Shield size={20} />
                         </div>
                         <div>
@@ -320,10 +320,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-gold/20 to-transparent border border-brand-gold/20">
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-blue/20 to-transparent border border-brand-blue/20">
                     <h4 className="font-bold mb-2">Upgrade to Pro</h4>
                     <p className="text-xs text-white/60 mb-4">Get access to premium features, priority support, and more.</p>
-                    <button className="w-full py-3 bg-brand-gold text-brand-black rounded-xl font-bold text-sm hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
+                    <button className="w-full py-3 bg-brand-blue text-brand-white rounded-xl font-bold text-sm hover:shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all">
                       View Plans
                     </button>
                   </div>
@@ -425,7 +425,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                         step={0.1}
                         aria-labelledby="Zoom"
                         onChange={(e) => setZoom(Number(e.target.value))}
-                        className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-brand-gold"
+                        className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-brand-blue"
                       />
                     </div>
                     
@@ -442,7 +442,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                       <button
                         onClick={handleCropSave}
                         disabled={isLoading}
-                        className="flex-1 py-2 rounded-lg bg-brand-gold text-brand-black font-bold text-xs hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all flex items-center justify-center gap-2"
+                        className="flex-1 py-2 rounded-lg bg-brand-blue text-brand-white font-bold text-xs hover:shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all flex items-center justify-center gap-2"
                       >
                         {isLoading ? <Loader2 className="animate-spin" size={14} /> : 'Apply'}
                       </button>

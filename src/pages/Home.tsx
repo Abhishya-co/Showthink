@@ -15,6 +15,7 @@ import WhyChooseUs from '../components/WhyChooseUs';
 import Blog from '../components/Blog';
 import { auth } from '../firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import LeaderboardBanner from '../components/LeaderboardBanner';
 import AuthModal from '../components/AuthModal';
 
 const Home = () => {
@@ -39,16 +40,20 @@ const Home = () => {
 
   return (
     <div className="overflow-hidden">
+      <div className="w-full relative z-20 pt-[72px]">
+        <LeaderboardBanner />
+      </div>
+      
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center pt-60 px-6">
+      <section className="relative min-h-screen flex flex-col pt-8 px-6">
         {/* Background Effects */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute top-1/4 -left-20 w-96 h-96 bg-brand-gold/10 rounded-full blur-[120px]" />
-          <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-brand-gold/5 rounded-full blur-[120px]" />
+          <div className="absolute top-1/4 -left-20 w-96 h-96 bg-brand-yellow/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-brand-yellow/5 rounded-full blur-[120px]" />
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
         </div>
 
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10 flex-grow">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -58,12 +63,12 @@ const Home = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="inline-block px-4 py-1.5 rounded-full bg-brand-gold/10 border border-brand-gold/20 text-brand-gold text-sm font-bold mb-6"
+              className="inline-block px-4 py-1.5 rounded-full bg-brand-yellow/10 border border-brand-yellow/20 text-brand-yellow text-sm font-bold mb-6"
             >
               Think Smart. Show Powerful.
             </motion.span>
             <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.1] mb-6">
-              We Turn Ideas Into <span className="text-gradient-gold">Powerful</span> Digital Experiences
+              We Turn Ideas Into <span className="text-gradient-yellow">Powerful</span> Digital Experiences
             </h1>
             <p className="text-xl text-white/70 mb-10 max-w-lg leading-relaxed">
               Websites, Marketing & Design That Actually Grow Your Business. Partner with Showthink to dominate your industry.
@@ -100,7 +105,7 @@ const Home = () => {
               className="absolute -top-6 -right-6 glass-card p-6 shadow-xl z-20"
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-brand-gold rounded-xl flex items-center justify-center text-brand-black">
+                <div className="w-12 h-12 bg-brand-yellow rounded-xl flex items-center justify-center text-brand-black">
                   <Star fill="currentColor" size={24} />
                 </div>
                 <div>
@@ -115,7 +120,7 @@ const Home = () => {
               className="absolute -bottom-6 -left-6 glass-card p-6 shadow-xl z-20"
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-brand-gold">
+                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-brand-yellow">
                   <Users size={24} />
                 </div>
                 <div>
@@ -129,7 +134,7 @@ const Home = () => {
       </section>
 
       {/* Services Section */}
-      <section className="py-24 px-6 bg-brand-black relative">
+      <section className="py-16 px-6 bg-brand-black relative">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">Our Services</h2>
@@ -153,16 +158,16 @@ const Home = () => {
                     to={`/services/${service.id}`}
                     className="group block h-full p-8 glass-card glow-hover"
                   >
-                    <div className="w-14 h-14 bg-brand-gold/10 rounded-2xl flex items-center justify-center text-brand-gold mb-6 group-hover:bg-brand-gold group-hover:text-brand-black transition-all duration-300">
+                    <div className="w-14 h-14 bg-brand-yellow/10 rounded-2xl flex items-center justify-center text-brand-yellow mb-6 group-hover:bg-brand-yellow group-hover:text-brand-black transition-all duration-300">
                       <IconComponent size={32} />
                     </div>
-                    <h3 className="text-xl font-bold mb-4 group-hover:text-brand-gold transition-colors">
+                    <h3 className="text-xl font-bold mb-4 group-hover:text-brand-yellow transition-colors">
                       {service.title}
                     </h3>
                     <p className="text-white/60 text-sm leading-relaxed mb-6">
                       {service.shortDescription}
                     </p>
-                    <div className="flex items-center gap-2 text-brand-gold text-sm font-bold">
+                    <div className="flex items-center gap-2 text-brand-yellow text-sm font-bold">
                       Learn More <ArrowRight size={16} />
                     </div>
                   </Link>
@@ -174,7 +179,7 @@ const Home = () => {
       </section>
 
       {/* Why Showthink */}
-      <section className="py-24 px-6 bg-white/5">
+      <section className="py-16 px-6 bg-white/5">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           <div>
             <h2 className="text-4xl md:text-5xl font-bold mb-8">Why Showthink?</h2>
@@ -186,7 +191,7 @@ const Home = () => {
                 { icon: Users, title: '24/7 Support', desc: 'Our team is always here to assist you with any queries.' },
               ].map((item, i) => (
                 <div key={i} className="space-y-3">
-                  <div className="w-12 h-12 bg-brand-gold/10 rounded-lg flex items-center justify-center text-brand-gold">
+                  <div className="w-12 h-12 bg-brand-yellow/10 rounded-lg flex items-center justify-center text-brand-yellow">
                     <item.icon size={24} />
                   </div>
                   <h4 className="text-lg font-bold">{item.title}</h4>
@@ -205,7 +210,7 @@ const Home = () => {
               />
             </div>
             <div className="absolute -bottom-8 -right-8 glass-card p-8 hidden md:block">
-              <div className="text-4xl font-extrabold text-brand-gold mb-1">100%</div>
+              <div className="text-4xl font-extrabold text-brand-yellow mb-1">100%</div>
               <div className="text-sm font-bold">Satisfaction Guaranteed</div>
             </div>
           </div>
@@ -222,7 +227,7 @@ const Home = () => {
       <CaseStudies />
 
       {/* Portfolio Preview */}
-      <section className="py-24 px-6">
+      <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
             <div>
@@ -250,9 +255,9 @@ const Home = () => {
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-8">
-                  <span className="text-brand-gold text-xs font-bold uppercase tracking-widest mb-2">{project.category}</span>
+                  <span className="text-brand-yellow text-xs font-bold uppercase tracking-widest mb-2">{project.category}</span>
                   <h3 className="text-2xl font-bold mb-4">{project.title}</h3>
-                  <Link to="/portfolio" className="text-sm font-bold flex items-center gap-2 text-white hover:text-brand-gold transition-colors">
+                  <Link to="/portfolio" className="text-sm font-bold flex items-center gap-2 text-white hover:text-brand-yellow transition-colors">
                     View Details <ArrowRight size={16} />
                   </Link>
                 </div>
@@ -281,10 +286,10 @@ const Home = () => {
       <Blog />
 
       {/* CTA Section */}
-      <section className="py-24 px-6">
+      <section className="py-16 px-6">
         <div className="max-w-5xl mx-auto glass-card p-12 md:p-20 text-center relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-gold to-transparent" />
-          <h2 className="text-4xl md:text-6xl font-bold mb-8">Let’s Build Something <span className="text-gradient-gold">Amazing</span> Together</h2>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-yellow to-transparent" />
+          <h2 className="text-4xl md:text-6xl font-bold mb-8">Let’s Build Something <span className="text-gradient-yellow">Amazing</span> Together</h2>
           <p className="text-xl text-white/60 mb-12 max-w-2xl mx-auto">
             Ready to take your business to the next level? Our team is standing by to help you achieve your digital goals.
           </p>

@@ -14,7 +14,7 @@ const Testimonials = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-5xl md:text-7xl font-extrabold mb-6"
           >
-            Client <span className="text-gradient-gold">Success</span>
+            Client <span className="text-gradient-blue">Success</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -36,9 +36,9 @@ const Testimonials = () => {
               transition={{ delay: index * 0.1 }}
               className="glass-card p-10 relative"
             >
-              <Quote className="absolute top-8 right-8 text-brand-gold/10" size={80} />
+              <Quote className="absolute top-8 right-8 text-brand-blue/10" size={80} />
               
-              <div className="flex gap-1 text-brand-gold mb-8">
+              <div className="flex gap-1 text-brand-blue mb-8">
                 {[...Array(testimonial.rating)].map((_, i) => (
                   <Star key={i} size={20} fill="currentColor" />
                 ))}
@@ -52,12 +52,12 @@ const Testimonials = () => {
                 <img
                   src={testimonial.image}
                   alt={testimonial.name}
-                  className="w-16 h-16 rounded-full border-2 border-brand-gold/30"
+                  className="w-16 h-16 rounded-full border-2 border-brand-blue/30"
                   referrerPolicy="no-referrer"
                 />
                 <div>
                   <h4 className="text-xl font-bold">{testimonial.name}</h4>
-                  <p className="text-sm text-brand-gold font-semibold">{testimonial.role}</p>
+                  <p className="text-sm text-brand-blue font-semibold">{testimonial.role}</p>
                 </div>
               </div>
             </motion.div>

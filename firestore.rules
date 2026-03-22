@@ -21,6 +21,9 @@ service cloud.firestore {
              data.message is string && data.message.size() > 0 && data.message.size() < 5000 &&
              data.get('phone', '') is string && data.get('phone', '').size() < 20 &&
              data.get('service', '') is string && data.get('service', '').size() < 100 &&
+             data.get('plan', '') is string && data.get('plan', '').size() < 100 &&
+             data.get('state', '') is string && data.get('state', '').size() < 100 &&
+             data.get('city', '') is string && data.get('city', '').size() < 100 &&
              data.createdAt is timestamp;
     }
 

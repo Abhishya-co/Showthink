@@ -27,6 +27,7 @@ export const SERVICES: Service[] = [
     shortDescription: 'High-performance websites built for conversion and speed.',
     fullDescription: 'Our development team creates stunning, responsive, and lightning-fast websites that serve as a powerful engine for your business growth.',
     icon: 'Code',
+    image: 'https://cheap-ivory-mjk7bqemjf.edgeone.app/file_00000000dad8720bb897de4148e576eb.png',
     features: [
       'Custom Website Design',
       'E-commerce Solutions',

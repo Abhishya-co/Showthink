@@ -22,6 +22,18 @@
           "type": "string",
           "description": "Service the sender is interested in."
         },
+        "plan": {
+          "type": "string",
+          "description": "The pricing plan the sender is interested in."
+        },
+        "state": {
+          "type": "string",
+          "description": "State of the sender."
+        },
+        "city": {
+          "type": "string",
+          "description": "City of the sender."
+        },
         "message": {
           "type": "string",
           "description": "The message content."
@@ -32,7 +44,7 @@
           "description": "Timestamp when the message was sent."
         }
       },
-      "required": ["name", "email", "message", "createdAt"]
+      "required": ["name", "email", "plan", "service", "state", "city", "message", "createdAt"]
     },
     "User": {
       "title": "User Profile",

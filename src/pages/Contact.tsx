@@ -1,16 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Mail, Phone, MapPin, Send, MessageSquare, AlertCircle, CheckCircle2, X } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { Mail, Phone, MapPin, Send, MessageSquare, AlertCircle, CheckCircle2, X, Sparkles } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { db, serverTimestamp, handleFirestoreError, OperationType, doc, getDoc, setDoc } from '../firebase';
 
 const Contact = () => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialPlan = queryParams.get('plan') || 'None';
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
+    plan: initialPlan,
     service: 'Digital Marketing',
+    state: '',
+    city: '',
     message: ''
   });
+
+  useEffect(() => {
+    if (initialPlan) {
+      setFormData(prev => ({ ...prev, plan: initialPlan }));
+    }
+  }, [initialPlan]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
@@ -61,8 +76,20 @@ const Contact = () => {
       });
 
       setSubmitted(true);
-      setFormData({ name: '', email: '', phone: '', service: 'Digital Marketing', message: '' });
+      setFormData({ name: '', email: '', phone: '', plan: 'None', service: 'Digital Marketing', state: '', city: '', message: '' });
       
+      // Trigger delightful confetti
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#FFD700', '#FFFFFF', '#FACC15'],
+        ticks: 200,
+        gravity: 1.2,
+        scalar: 1.2,
+        shapes: ['circle', 'square']
+      });
+
       // Auto-reset success message after 1 second
       setTimeout(() => {
         setSubmitted(false);
@@ -81,7 +108,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="pt-64 pb-24 px-6">
+    <div className="pt-32 pb-24 px-6">
       <div className="max-w-7xl mx-auto">
         {/* Confirmation Modal */}
         <AnimatePresence>
@@ -93,7 +120,7 @@ const Contact = () => {
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 className="relative w-full max-w-lg glass-card p-8 md:p-10 overflow-hidden"
               >
-                <div className="absolute top-0 left-0 w-full h-1 bg-brand-gold" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-brand-yellow" />
                 <button 
                   onClick={() => setIsConfirming(false)}
                   className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors"
@@ -102,7 +129,7 @@ const Contact = () => {
                 </button>
 
                 <div className="flex items-center gap-4 mb-8">
-                  <div className="w-12 h-12 bg-brand-gold/20 rounded-xl flex items-center justify-center text-brand-gold">
+                  <div className="w-12 h-12 bg-brand-yellow/20 rounded-xl flex items-center justify-center text-brand-yellow">
                     <CheckCircle2 size={24} />
                   </div>
                   <div>
@@ -128,8 +155,22 @@ const Contact = () => {
                       <p className="font-medium">{formData.phone}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">Service</p>
-                      <p className="font-medium">{formData.service}</p>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">Plan</p>
+                      <p className="font-medium">{formData.plan}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">Service</p>
+                    <p className="font-medium">{formData.service}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">State</p>
+                      <p className="font-medium">{formData.state}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">City</p>
+                      <p className="font-medium">{formData.city}</p>
                     </div>
                   </div>
                   <div>
@@ -148,7 +189,7 @@ const Contact = () => {
                   <button
                     onClick={handleFinalSubmit}
                     disabled={isSubmitting}
-                    className="flex-1 py-4 rounded-xl bg-brand-gold text-brand-black font-bold hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all flex items-center justify-center gap-2"
+                    className="flex-1 py-4 rounded-xl bg-brand-yellow text-brand-black font-bold hover:shadow-[0_0_20px_rgba(255,215,0,0.4)] transition-all flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? 'Sending...' : 'Confirm & Send'}
                   </button>
@@ -164,7 +205,7 @@ const Contact = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-5xl md:text-7xl font-extrabold mb-6"
           >
-            Let's <span className="text-gradient-gold">Connect</span>
+            Let's <span className="text-gradient-yellow">Connect</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -183,7 +224,7 @@ const Contact = () => {
               <h3 className="text-2xl font-bold mb-4">Contact Information</h3>
               
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-brand-gold/10 rounded-xl flex items-center justify-center text-brand-gold shrink-0">
+                <div className="w-12 h-12 bg-brand-yellow/10 rounded-xl flex items-center justify-center text-brand-yellow shrink-0">
                   <Mail size={24} />
                 </div>
                 <div>
@@ -193,7 +234,7 @@ const Contact = () => {
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-brand-gold/10 rounded-xl flex items-center justify-center text-brand-gold shrink-0">
+                <div className="w-12 h-12 bg-brand-yellow/10 rounded-xl flex items-center justify-center text-brand-yellow shrink-0">
                   <Phone size={24} />
                 </div>
                 <div>
@@ -203,7 +244,7 @@ const Contact = () => {
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-brand-gold/10 rounded-xl flex items-center justify-center text-brand-gold shrink-0">
+                <div className="w-12 h-12 bg-brand-yellow/10 rounded-xl flex items-center justify-center text-brand-yellow shrink-0">
                   <MapPin size={24} />
                 </div>
                 <div>
@@ -213,7 +254,7 @@ const Contact = () => {
               </div>
             </div>
 
-              <div className="glass-card p-8 bg-brand-gold/5 border-brand-gold/20">
+              <div className="glass-card p-8 bg-brand-yellow/5 border-brand-yellow/20">
                 <h4 className="text-xl font-bold mb-4">Chat with us on WhatsApp</h4>
                 <p className="text-white/60 mb-6 text-sm">
                   Get instant answers to your questions. Our team is active on WhatsApp.
@@ -234,20 +275,44 @@ const Contact = () => {
             <div className="glass-card p-8 md:p-12">
               {submitted ? (
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-center py-20"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-20 relative overflow-hidden"
                 >
+                  {/* Decorative Sparkles */}
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      opacity: [0.3, 0.6, 0.3],
+                      rotate: [0, 90, 180, 270, 360]
+                    }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                    className="absolute top-10 left-10 text-brand-yellow/20"
+                  >
+                    <Sparkles size={40} />
+                  </motion.div>
+                  <motion.div
+                    animate={{ 
+                      scale: [1.2, 1, 1.2],
+                      opacity: [0.2, 0.5, 0.2],
+                      rotate: [360, 270, 180, 90, 0]
+                    }}
+                    transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                    className="absolute bottom-10 right-10 text-brand-yellow/20"
+                  >
+                    <Sparkles size={60} />
+                  </motion.div>
+
                   <div className="relative w-24 h-24 mx-auto mb-8">
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                      className="absolute inset-0 bg-brand-gold/20 rounded-full"
+                      className="absolute inset-0 bg-brand-yellow/20 rounded-full"
                     />
                     <svg
                       viewBox="0 0 52 52"
-                      className="relative z-10 w-full h-full text-brand-gold p-4"
+                      className="relative z-10 w-full h-full text-brand-yellow p-4"
                     >
                       <motion.path
                         fill="none"
@@ -264,35 +329,45 @@ const Contact = () => {
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: [0, 1, 0] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                      className="absolute inset-0 border-2 border-brand-gold rounded-full"
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                      className="absolute inset-0 border-2 border-brand-yellow rounded-full"
                     />
                   </div>
                   <motion.h3 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="text-3xl md:text-4xl font-extrabold mb-4"
+                    className="text-3xl md:text-5xl font-extrabold mb-4"
                   >
-                    Message <span className="text-gradient-gold">Received!</span>
+                    Message <span className="text-gradient-yellow">Successfully Sent!</span>
                   </motion.h3>
                   <motion.p 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
-                    className="text-white/60 mb-10 text-lg max-w-md mx-auto"
+                    className="text-white/70 mb-10 text-lg max-w-md mx-auto leading-relaxed"
                   >
                     Thank you for reaching out. Our team has been notified and we'll get back to you within 24 hours.
                   </motion.p>
-                  <motion.button
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6 }}
-                    onClick={() => setSubmitted(false)}
-                    className="btn-secondary"
+                    className="flex flex-col sm:flex-row items-center justify-center gap-4"
                   >
-                    Send Another Message
-                  </motion.button>
+                    <button
+                      onClick={() => setSubmitted(false)}
+                      className="btn-primary px-8"
+                    >
+                      Send Another Message
+                    </button>
+                    <button
+                      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                      className="btn-secondary px-8"
+                    >
+                      Back to Top
+                    </button>
+                  </motion.div>
                 </motion.div>
               ) : (
                 <form onSubmit={handleInitialSubmit} className="space-y-6">
@@ -317,7 +392,7 @@ const Contact = () => {
                         value={formData.name}
                         onChange={handleChange}
                         placeholder="John Doe"
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-gold transition-colors"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors"
                       />
                     </div>
                     <div className="space-y-2">
@@ -330,13 +405,11 @@ const Contact = () => {
                         onChange={handleChange}
                         placeholder="john@example.com"
                         className={`w-full bg-white/5 border rounded-xl px-6 py-4 focus:outline-none transition-colors ${
-                          duplicateError ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-brand-gold'
+                          duplicateError ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-brand-yellow'
                         }`}
                       />
                     </div>
-                  </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-white/60">Phone Number</label>
                       <input
@@ -346,21 +419,99 @@ const Contact = () => {
                         value={formData.phone}
                         onChange={handleChange}
                         placeholder="+91 00000 00000"
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-gold transition-colors"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors"
                       />
                     </div>
+
                     <div className="space-y-2">
+                      <label className="text-sm font-bold text-white/60">State</label>
+                      <select
+                        required
+                        name="state"
+                        value={formData.state}
+                        onChange={handleChange}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors appearance-none"
+                      >
+                        <option className="bg-brand-black" value="">Select State</option>
+                        <option className="bg-brand-black" value="Andhra Pradesh">Andhra Pradesh</option>
+                        <option className="bg-brand-black" value="Arunachal Pradesh">Arunachal Pradesh</option>
+                        <option className="bg-brand-black" value="Assam">Assam</option>
+                        <option className="bg-brand-black" value="Bihar">Bihar</option>
+                        <option className="bg-brand-black" value="Chhattisgarh">Chhattisgarh</option>
+                        <option className="bg-brand-black" value="Goa">Goa</option>
+                        <option className="bg-brand-black" value="Gujarat">Gujarat</option>
+                        <option className="bg-brand-black" value="Haryana">Haryana</option>
+                        <option className="bg-brand-black" value="Himachal Pradesh">Himachal Pradesh</option>
+                        <option className="bg-brand-black" value="Jharkhand">Jharkhand</option>
+                        <option className="bg-brand-black" value="Karnataka">Karnataka</option>
+                        <option className="bg-brand-black" value="Kerala">Kerala</option>
+                        <option className="bg-brand-black" value="Madhya Pradesh">Madhya Pradesh</option>
+                        <option className="bg-brand-black" value="Maharashtra">Maharashtra</option>
+                        <option className="bg-brand-black" value="Manipur">Manipur</option>
+                        <option className="bg-brand-black" value="Meghalaya">Meghalaya</option>
+                        <option className="bg-brand-black" value="Mizoram">Mizoram</option>
+                        <option className="bg-brand-black" value="Nagaland">Nagaland</option>
+                        <option className="bg-brand-black" value="Odisha">Odisha</option>
+                        <option className="bg-brand-black" value="Punjab">Punjab</option>
+                        <option className="bg-brand-black" value="Rajasthan">Rajasthan</option>
+                        <option className="bg-brand-black" value="Sikkim">Sikkim</option>
+                        <option className="bg-brand-black" value="Tamil Nadu">Tamil Nadu</option>
+                        <option className="bg-brand-black" value="Telangana">Telangana</option>
+                        <option className="bg-brand-black" value="Tripura">Tripura</option>
+                        <option className="bg-brand-black" value="Uttar Pradesh">Uttar Pradesh</option>
+                        <option className="bg-brand-black" value="Uttarakhand">Uttarakhand</option>
+                        <option className="bg-brand-black" value="West Bengal">West Bengal</option>
+                        <option className="bg-brand-black" value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                        <option className="bg-brand-black" value="Chandigarh">Chandigarh</option>
+                        <option className="bg-brand-black" value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                        <option className="bg-brand-black" value="Delhi">Delhi</option>
+                        <option className="bg-brand-black" value="Jammu and Kashmir">Jammu and Kashmir</option>
+                        <option className="bg-brand-black" value="Ladakh">Ladakh</option>
+                        <option className="bg-brand-black" value="Lakshadweep">Lakshadweep</option>
+                        <option className="bg-brand-black" value="Puducherry">Puducherry</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-white/60">City</label>
+                      <input
+                        required
+                        type="text"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleChange}
+                        placeholder="e.g. New Delhi"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-white/60">Select Plan</label>
+                      <select
+                        name="plan"
+                        value={formData.plan}
+                        onChange={handleChange}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors appearance-none"
+                      >
+                        <option className="bg-brand-black" value="None">None</option>
+                        <option className="bg-brand-black" value="Basic Plan">Basic Plan</option>
+                        <option className="bg-brand-black" value="Standard Plan">Standard Plan</option>
+                        <option className="bg-brand-black" value="Premium Plan">Premium Plan</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-2 md:col-span-2">
                       <label className="text-sm font-bold text-white/60">Service Interested In</label>
                       <select
                         name="service"
                         value={formData.service}
                         onChange={handleChange}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-gold transition-colors appearance-none"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors appearance-none"
                       >
-                        <option className="bg-brand-black">Digital Marketing</option>
-                        <option className="bg-brand-black">Website Development</option>
-                        <option className="bg-brand-black">Graphic Design</option>
-                        <option className="bg-brand-black">Social Media Management</option>
+                        <option className="bg-brand-black" value="Digital Marketing">Digital Marketing</option>
+                        <option className="bg-brand-black" value="Website Development">Website Development</option>
+                        <option className="bg-brand-black" value="Graphic Design">Graphic Design</option>
+                        <option className="bg-brand-black" value="Social Media Management">Social Media Management</option>
                       </select>
                     </div>
                   </div>
@@ -374,7 +525,7 @@ const Contact = () => {
                       onChange={handleChange}
                       placeholder="Tell us about your project..."
                       rows={6}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-gold transition-colors resize-none"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors resize-none"
                     ></textarea>
                   </div>
 

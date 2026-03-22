@@ -6,7 +6,8 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
   updateProfile,
-  signOut
+  signOut,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { getFirestore, collection, addDoc, serverTimestamp, doc, getDocFromServer, setDoc, getDoc, onSnapshot, query, where, getDocs, limit } from 'firebase/firestore';
 
@@ -29,7 +30,7 @@ export const signInWithGoogle = async () => {
   }
 };
 
-export { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, signOut };
+export { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, signOut, sendPasswordResetEmail };
 
 // Error handling for Firestore
 export enum OperationType {
