@@ -36,7 +36,7 @@ const VideoSection = () => {
         >
           <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
             <img
-              src="https://picsum.photos/seed/video-bg/1280/720"
+              src="https://senior-lavender-y8ktygggml.edgeone.app/file_0000000067c4720b95e1c4b1d5c657c5.jpg"
               alt="Video Preview"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               referrerPolicy="no-referrer"
@@ -103,7 +103,7 @@ const VideoSection = () => {
               <iframe
                 width="100%"
                 height="100%"
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
+                src="https://www.youtube.com/embed/ADMaLnGhuuI?autoplay=1"
                 title="Showthink Intro Video"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

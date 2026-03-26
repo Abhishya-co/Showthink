@@ -7,6 +7,8 @@ import ServiceDetail from './pages/ServiceDetail';
 import Portfolio from './pages/Portfolio';
 import PricingPage from './pages/PricingPage';
 import Contact from './pages/Contact';
+import Terms from './pages/Terms';
+import DomainSearchPage from './pages/DomainSearchPage';
 
 export default function App() {
   return (
@@ -18,7 +20,9 @@ export default function App() {
           <Route path="services/:id" element={<ServiceDetail />} />
           <Route path="portfolio" element={<Portfolio />} />
           <Route path="pricing" element={<PricingPage />} />
+          <Route path="domain-search" element={<DomainSearchPage />} />
           <Route path="contact" element={<Contact />} />
+          <Route path="terms" element={<Terms />} />
         </Route>
       </Routes>
     </Router>

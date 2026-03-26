@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useLocation } from 'react-router-dom';
-import { Mail, Phone, MapPin, Send, MessageSquare, AlertCircle, CheckCircle2, X, Sparkles } from 'lucide-react';
+import { useLocation, Link } from 'react-router-dom';
+import { Mail, MapPin, Send, MessageSquare, AlertCircle, CheckCircle2, X, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { db, serverTimestamp, handleFirestoreError, OperationType, doc, getDoc, setDoc } from '../firebase';
 
@@ -235,16 +235,6 @@ const Contact = () => {
 
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-brand-yellow/10 rounded-xl flex items-center justify-center text-brand-yellow shrink-0">
-                  <Phone size={24} />
-                </div>
-                <div>
-                  <p className="text-sm text-white/40 mb-1">Call Us</p>
-                  <p className="font-bold">+91 9911230354</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-brand-yellow/10 rounded-xl flex items-center justify-center text-brand-yellow shrink-0">
                   <MapPin size={24} />
                 </div>
                 <div>
@@ -253,21 +243,6 @@ const Contact = () => {
                 </div>
               </div>
             </div>
-
-              <div className="glass-card p-8 bg-brand-yellow/5 border-brand-yellow/20">
-                <h4 className="text-xl font-bold mb-4">Chat with us on WhatsApp</h4>
-                <p className="text-white/60 mb-6 text-sm">
-                  Get instant answers to your questions. Our team is active on WhatsApp.
-                </p>
-                <a
-                  href="https://wa.me/919911230354?text=Hi%2C%20I%20want%20to%20grow%20my%20business%20with%20Showthink"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary w-full flex items-center justify-center gap-2"
-                >
-                  <MessageSquare size={20} /> WhatsApp Now
-                </a>
-              </div>
           </div>
 
           {/* Contact Form */}
@@ -540,6 +515,13 @@ const Contact = () => {
                       </>
                     )}
                   </button>
+
+                  <p className="text-center text-xs text-white/40 mt-4">
+                    By submitting this form, you agree to our{' '}
+                    <Link to="/terms" className="text-brand-yellow hover:underline">
+                      Terms & Conditions
+                    </Link>
+                  </p>
                 </form>
               )}
             </div>

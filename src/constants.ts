@@ -89,7 +89,7 @@ export const PROJECTS: Project[] = [
     id: '1',
     title: 'Luxe Real Estate',
     category: 'Websites',
-    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=800&h=600',
+    image: 'https://senior-lavender-y8ktygggml.edgeone.app/file_0000000067c4720b95e1c4b1d5c657c5.jpg',
     description: 'A premium property listing platform with interactive maps.'
   },
   {
@@ -111,7 +111,7 @@ export const PROJECTS: Project[] = [
     id: '4',
     title: 'FitTrack App',
     category: 'Websites',
-    image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=800&h=600',
+    image: 'https://senior-lavender-y8ktygggml.edgeone.app/file_0000000067c4720b95e1c4b1d5c657c5.jpg',
     description: 'Modern landing page for a fitness tracking application.'
   },
   {
@@ -140,7 +140,7 @@ export const CASE_STUDIES = [
     solution: 'Developed a high-converting custom website with integrated booking and local SEO strategy.',
     result: '0 to 12,000+ monthly organic visitors in 6 months.',
     beforeImage: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=600&h=400&grayscale=1',
-    afterImage: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=600&h=400'
+    afterImage: 'https://senior-lavender-y8ktygggml.edgeone.app/file_0000000067c4720b95e1c4b1d5c657c5.jpg'
   },
   {
     id: '2',

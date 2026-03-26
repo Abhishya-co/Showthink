@@ -84,6 +84,70 @@
         }
       },
       "required": ["uid", "name", "email", "createdAt"]
+    },
+    "AuditRequest": {
+      "title": "Website Audit Request",
+      "description": "A request for a free website audit.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name of the requester."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address of the requester."
+        },
+        "website": {
+          "type": "string",
+          "description": "URL of the website to be audited."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the request was made."
+        }
+      },
+      "required": ["name", "email", "website", "createdAt"]
+    },
+    "DomainRegistration": {
+      "title": "Domain Registration Request",
+      "description": "A request to register a specific domain name.",
+      "type": "object",
+      "properties": {
+        "domain": {
+          "type": "string",
+          "description": "The domain name to be registered."
+        },
+        "price": {
+          "type": "string",
+          "description": "The price of the domain registration."
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the registrant."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address of the registrant."
+        },
+        "phone": {
+          "type": "string",
+          "description": "Phone number of the registrant."
+        },
+        "address": {
+          "type": "string",
+          "description": "Full address of the registrant."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the registration request was made."
+        }
+      },
+      "required": ["domain", "name", "email", "phone", "createdAt"]
     }
   },
   "firestore": {
@@ -94,6 +158,14 @@
     "/users/{userId}": {
       "schema": "User",
       "description": "Collection of user profile information."
+    },
+    "/audit-requests/{requestId}": {
+      "schema": "AuditRequest",
+      "description": "Collection of website audit requests."
+    },
+    "/domain-registrations/{registrationId}": {
+      "schema": "DomainRegistration",
+      "description": "Collection of domain registration requests."
     }
   }
 }

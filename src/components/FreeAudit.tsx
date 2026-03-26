@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Search, CheckCircle2, AlertCircle, Send, Globe, User, Mail } from 'lucide-react';
+import { Search, CheckCircle2, AlertCircle, Send, Globe, User, Mail, Loader2 } from 'lucide-react';
+import { db, collection, addDoc, serverTimestamp, handleFirestoreError, OperationType } from '../firebase';
 
 const FreeAudit = () => {
   const [formData, setFormData] = useState({
@@ -9,14 +10,32 @@ const FreeAudit = () => {
     website: ''
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would send this to your backend
-    console.log('Audit Request:', formData);
-    setIsSubmitted(true);
-    setFormData({ name: '', email: '', website: '' });
-    setTimeout(() => setIsSubmitted(false), 5000);
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const auditData = {
+        ...formData,
+        createdAt: serverTimestamp()
+      };
+
+      await addDoc(collection(db, 'audit-requests'), auditData);
+      
+      setIsSubmitted(true);
+      setFormData({ name: '', email: '', website: '' });
+      setTimeout(() => setIsSubmitted(false), 5000);
+    } catch (err) {
+      console.error('Error submitting audit request:', err);
+      setError('Something went wrong. Please try again later.');
+      handleFirestoreError(err, OperationType.WRITE, 'audit-requests');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -138,10 +157,24 @@ const FreeAudit = () => {
 
                 <button
                   type="submit"
-                  className="w-full btn-primary py-5 text-lg font-bold shadow-[0_10px_30px_rgba(255,215,0,0.3)] hover:shadow-[0_15px_40px_rgba(255,215,0,0.5)] transition-all"
+                  disabled={isSubmitting}
+                  className="w-full btn-primary py-5 text-lg font-bold shadow-[0_10px_30px_rgba(255,215,0,0.3)] hover:shadow-[0_15px_40px_rgba(255,215,0,0.5)] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Get Free Audit
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="animate-spin" size={24} />
+                      Processing...
+                    </>
+                  ) : (
+                    'Get Free Audit'
+                  )}
                 </button>
+                
+                {error && (
+                  <p className="text-center text-sm text-red-500 font-medium">
+                    {error}
+                  </p>
+                )}
                 
                 <p className="text-center text-xs text-white/30">
                   By clicking, you agree to our terms and privacy policy.

@@ -9,6 +9,7 @@ import Pricing from '../components/Pricing';
 import CaseStudies from '../components/CaseStudies';
 import TestimonialsSlider from '../components/TestimonialsSlider';
 import FreeAudit from '../components/FreeAudit';
+import DomainSearch from '../components/DomainSearch';
 import VideoSection from '../components/VideoSection';
 import FAQ from '../components/FAQ';
 import WhyChooseUs from '../components/WhyChooseUs';
@@ -219,6 +220,9 @@ const Home = () => {
 
       {/* 7-Day Delivery Section */}
       <SevenDayDelivery />
+
+      {/* Domain Search Section */}
+      <DomainSearch />
 
       {/* Pricing Section */}
       <Pricing />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, Mail, Phone, MapPin, Instagram, Facebook, Twitter, Linkedin } from 'lucide-react';
+import { Zap, Mail, MapPin, Instagram, Facebook, Twitter, Linkedin } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -23,7 +23,12 @@ const Footer = () => {
             Think Smart. Show Powerful. We turn ideas into powerful digital experiences that grow your business.
           </p>
           <div className="flex gap-4">
-            <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-yellow hover:text-brand-black transition-all">
+            <a 
+              href="https://www.instagram.com/showthinks?igsh=cHQzMDdmd3k4MDRp" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-yellow hover:text-brand-black transition-all"
+            >
               <Instagram size={20} />
             </a>
             <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-yellow hover:text-brand-black transition-all">
@@ -45,8 +50,10 @@ const Footer = () => {
             <li><Link to="/" className="text-white/60 hover:text-brand-yellow transition-colors">Home</Link></li>
             <li><Link to="/services" className="text-white/60 hover:text-brand-yellow transition-colors">Services</Link></li>
             <li><Link to="/portfolio" className="text-white/60 hover:text-brand-yellow transition-colors">Portfolio</Link></li>
-            <li><Link to="/testimonials" className="text-white/60 hover:text-brand-yellow transition-colors">Testimonials</Link></li>
+            <li><Link to="/pricing" className="text-white/60 hover:text-brand-yellow transition-colors">Pricing</Link></li>
+            <li><Link to="/domain-search" className="text-white/60 hover:text-brand-yellow transition-colors">Domain Search</Link></li>
             <li><Link to="/contact" className="text-white/60 hover:text-brand-yellow transition-colors">Contact</Link></li>
+            <li><Link to="/terms" className="text-white/60 hover:text-brand-yellow transition-colors">Terms & Conditions</Link></li>
           </ul>
         </div>
 
@@ -68,10 +75,6 @@ const Footer = () => {
             <li className="flex items-start gap-3 text-white/60">
               <Mail className="text-brand-yellow shrink-0" size={20} />
               <span>a2sfeatures@gmail.com</span>
-            </li>
-            <li className="flex items-start gap-3 text-white/60">
-              <Phone className="text-brand-yellow shrink-0" size={20} />
-              <span>+91 9911230354</span>
             </li>
             <li className="flex items-start gap-3 text-white/60">
               <MapPin className="text-brand-yellow shrink-0" size={20} />

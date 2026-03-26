@@ -42,9 +42,42 @@ service cloud.firestore {
              (!('createdAt' in data) || data.createdAt is timestamp);
     }
 
+    function isValidAuditRequest(data) {
+      return data.keys().hasAll(['name', 'email', 'website', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
+             data.website is string && data.website.size() > 0 && data.website.size() < 500 &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidDomainRegistration(data) {
+      return data.keys().hasAll(['domain', 'price', 'name', 'email', 'phone', 'address', 'createdAt']) &&
+             data.domain is string && data.domain.size() > 0 && data.domain.size() < 255 &&
+             data.price is string && data.price.size() > 0 && data.price.size() < 20 &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
+             data.phone is string && data.phone.size() > 0 && data.phone.size() < 20 &&
+             data.address is string && data.address.size() > 0 && data.address.size() < 500 &&
+             data.createdAt is timestamp;
+    }
+
     // ===============================================================
     // Collection Rules
     // ===============================================================
+
+    match /domain-registrations/{registrationId} {
+      // Anyone can submit a domain registration request
+      allow create: if isValidDomainRegistration(request.resource.data);
+      // Only admin can read, list, update or delete domain registration requests
+      allow read, list, update, delete: if isAdmin();
+    }
+
+    match /audit-requests/{requestId} {
+      // Anyone can submit an audit request
+      allow create: if isValidAuditRequest(request.resource.data);
+      // Only admin can read, list, update or delete audit requests
+      allow read, list, update, delete: if isAdmin();
+    }
 
     match /messages/{email} {
       // Anyone can check if their email has already been used (get)

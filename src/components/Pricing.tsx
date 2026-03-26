@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, Zap, Star, Crown, ArrowRight, X, PartyPopper, Lock } from 'lucide-react';
+import { Check, Zap, Star, Crown, ArrowRight, X, PartyPopper, Lock, ArrowLeft, Clock } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import { auth } from '../firebase';
@@ -15,7 +15,33 @@ const Pricing = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [viewState, setViewState] = useState<'plans' | 'image' | 'wait'>('plans');
+  const [countdown, setCountdown] = useState(60);
   const standardPlanRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let timer: any;
+    let interval: any;
+    
+    if (viewState === 'image') {
+      setCountdown(60);
+      interval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            setViewState('wait');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timer);
+    };
+  }, [viewState]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -114,10 +140,73 @@ const Pricing = () => {
   ];
 
   return (
-    <section className="pt-24 pb-6 px-6 bg-brand-black relative">
+    <section className="pt-24 pb-6 px-6 bg-brand-black relative min-h-[600px]">
       <div className="max-w-7xl mx-auto">
-        <AnimatePresence>
-          {showPopup && (
+        <AnimatePresence mode="wait">
+          {viewState === 'image' && (
+            <motion.div
+              key="image-view"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="flex flex-col items-center justify-center py-12"
+            >
+              <button
+                onClick={() => setViewState('plans')}
+                className="mb-8 flex items-center gap-2 text-white/60 hover:text-brand-yellow transition-colors font-bold"
+              >
+                <ArrowLeft size={20} /> Back to Plans
+              </button>
+              <div className="flex flex-col items-center gap-4">
+                <div className="bg-brand-yellow/10 border border-brand-yellow/30 px-6 py-2 rounded-full text-brand-yellow font-bold text-sm animate-pulse">
+                  Expires in: {countdown}s
+                </div>
+                <div className="relative max-w-[250px] w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+                  <img
+                    src="https://cruel-sapphire-woscagqkjm.edgeone.app/IMG-20260324-WA0009~2.jpg"
+                    alt="Special Offer"
+                    className="w-full h-auto"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {viewState === 'wait' && (
+            <motion.div
+              key="wait-view"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="flex flex-col items-center justify-center py-24 text-center"
+            >
+              <div className="w-24 h-24 bg-brand-yellow/10 rounded-full flex items-center justify-center text-brand-yellow mb-8 animate-pulse">
+                <Clock size={48} />
+              </div>
+              <h2 className="text-4xl md:text-6xl font-extrabold mb-6">Session <span className="text-gradient-yellow">Expired</span></h2>
+              <div className="glass-card px-8 py-4 mb-12 border-brand-yellow/20">
+                <p className="text-3xl font-bold text-brand-yellow">2 Hours Wait</p>
+                <p className="text-sm text-white/40 mt-1">Coming soon, contact our team</p>
+              </div>
+              <button
+                onClick={() => setViewState('plans')}
+                className="btn-secondary flex items-center gap-2"
+              >
+                <ArrowLeft size={20} /> Back to Pricing
+              </button>
+            </motion.div>
+          )}
+
+          {viewState === 'plans' && (
+            <motion.div
+              key="plans-view"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <AnimatePresence>
+                {showPopup && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -262,8 +351,8 @@ const Pricing = () => {
                   ))}
                 </div>
 
-                <Link
-                  to={`/contact?plan=${encodeURIComponent(plan.name)}`}
+                <button
+                  onClick={() => setViewState('image')}
                   className={`w-full py-3 rounded-xl font-bold text-center transition-all duration-300 flex items-center justify-center gap-2 ${
                     plan.highlighted
                       ? 'bg-brand-yellow text-brand-black hover:shadow-[0_0_20px_rgba(250,204,21,0.4)]'
@@ -271,28 +360,31 @@ const Pricing = () => {
                   }`}
                 >
                   Get Started <ArrowRight size={18} />
-                </Link>
+                </button>
               </motion.div>
             ))}
           </div>
         )}
 
-        {user && (
+        {user && viewState === 'plans' && (
           <div className="mt-8 text-center">
             <p className="text-white/40 text-sm">
               Need a custom enterprise solution? <Link to="/contact" className="text-brand-yellow hover:underline">Contact us</Link> for a tailored quote.
             </p>
           </div>
         )}
+      </motion.div>
+    )}
+  </AnimatePresence>
 
-        <AuthModal 
-          isOpen={isAuthModalOpen} 
-          onClose={() => setIsAuthModalOpen(false)} 
-          onSuccess={() => setIsAuthModalOpen(false)}
-        />
-      </div>
-    </section>
-  );
+  <AuthModal 
+    isOpen={isAuthModalOpen} 
+    onClose={() => setIsAuthModalOpen(false)} 
+    onSuccess={() => setIsAuthModalOpen(false)}
+  />
+</div>
+</section>
+);
 };
 
 export default Pricing;

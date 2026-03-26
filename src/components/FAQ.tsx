@@ -17,7 +17,7 @@ const faqs = [
   },
   {
     question: "How do I contact support?",
-    answer: "You can reach our support team via email at a2sfeatures@gmail.com or through our WhatsApp support line at +91 9911230354. For existing clients, we also provide a dedicated project management dashboard for direct communication."
+    answer: "You can reach our support team via email at a2sfeatures@gmail.com. For existing clients, we also provide a dedicated project management dashboard for direct communication."
   }
 ];
 
