@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Globe, CheckCircle2, XCircle, ArrowRight, User, Mail, Phone, Loader2, Send, MapPin, Sparkles, RefreshCw } from 'lucide-react';
 import { db, collection, addDoc, serverTimestamp, handleFirestoreError, OperationType, query as firestoreQuery, where, getDocs } from '../firebase';
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 
 const DomainSearch = () => {
   const [query, setQuery] = useState('');
@@ -55,24 +55,67 @@ const DomainSearch = () => {
     setShowForm(false);
 
     try {
-      // Simulate domain availability check
-      const isAvailable = Math.random() > 0.4; 
-
       const domain = trimmedQuery;
       const nameWithoutTld = domain.split('.')[0];
       const tld = Object.keys(domainPrices).find(t => domain.endsWith(t)) || '.com';
       const price = domainPrices[tld] || '999';
+      const altTlds = Object.keys(domainPrices).filter(t => t !== tld);
+      const allDomainsToCheck = [domain, ...altTlds.map(t => `${nameWithoutTld}${t}`)];
+
+      // 1. Check Firestore for ALL domains in parallel (much faster than individual queries)
+      const firestoreCheckPromise = getDocs(
+        firestoreQuery(
+          collection(db, 'domain-registrations'), 
+          where('domain', 'in', allDomainsToCheck)
+        )
+      );
+
+      // 2. Use Gemini with Google Search for real-time availability check
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+      const geminiPromise = ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Check real-time availability for: ${allDomainsToCheck.join(', ')}. Return JSON array of {domain: string, available: boolean}. Use Google Search.`,
+        config: {
+          tools: [{ googleSearch: {} }],
+          responseMimeType: "application/json",
+          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }, // Faster processing
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                domain: { type: Type.STRING },
+                available: { type: Type.BOOLEAN }
+              },
+              required: ["domain", "available"]
+            }
+          }
+        }
+      });
+
+      // Run both checks in parallel
+      const [querySnapshot, response] = await Promise.all([firestoreCheckPromise, geminiPromise]);
       
+      const registeredInDB = new Set(querySnapshot.docs.map(doc => doc.data().domain));
+      const availabilityResults: { domain: string; available: boolean }[] = JSON.parse(response.text || "[]");
+      
+      // Process main domain
+      const mainResult = availabilityResults.find(r => r.domain === domain);
+      const isAvailable = registeredInDB.has(domain) ? false : (mainResult ? mainResult.available : false);
       setSearchResult({ domain, available: isAvailable, price });
 
-      // Generate alternatives
-      const alts = Object.keys(domainPrices)
-        .filter(t => t !== tld)
-        .map(t => ({
-          domain: `${nameWithoutTld}${t}`,
-          available: Math.random() > 0.3,
+      // Process alternatives
+      const alts = altTlds.map(t => {
+        const altDomain = `${nameWithoutTld}${t}`;
+        const altResult = availabilityResults.find(r => r.domain === altDomain);
+        const altAvailable = registeredInDB.has(altDomain) ? false : (altResult ? altResult.available : false);
+        
+        return {
+          domain: altDomain,
+          available: altAvailable,
           price: domainPrices[t]
-        }));
+        };
+      });
       
       setAlternatives(alts);
     } catch (error) {
@@ -117,33 +160,48 @@ const DomainSearch = () => {
       let prompt = `Generate 5 unique, creative, and catchy business names based on the keyword: "${businessKeyword}".`;
       if (businessCategory) prompt += ` The business category is "${businessCategory}".`;
       if (nameLength !== 'any') prompt += ` Each name should be approximately ${nameLength} letters long.`;
-      prompt += ` The names should be suitable for a domain name. Return only a JSON array of strings.`;
+      prompt += ` For each name, also check the real-time availability of its corresponding .com domain using Google Search.
+      Return a JSON array of objects, where each object has "name", "domain", and "available" (boolean) properties.`;
 
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: prompt,
         config: {
+          tools: [{ googleSearch: {} }],
           responseMimeType: "application/json",
+          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
           responseSchema: {
             type: Type.ARRAY,
-            items: { type: Type.STRING }
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                domain: { type: Type.STRING },
+                available: { type: Type.BOOLEAN }
+              },
+              required: ["name", "domain", "available"]
+            }
           }
         }
       });
 
-      const names: string[] = JSON.parse(response.text || "[]");
+      const namesWithAvailability: { name: string; domain: string; available: boolean }[] = JSON.parse(response.text || "[]");
       
-      // Check domain availability for each name (simulation)
-      const results = names.map((name) => {
-        const domain = name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com';
-        
-        return {
-          name,
-          domain,
-          available: Math.random() > 0.3,
-          price: '999'
-        };
-      });
+      // Check domain availability for all names against our DB in ONE query
+      const allDomains = namesWithAvailability.map(item => item.domain);
+      const querySnapshot = await getDocs(
+        firestoreQuery(
+          collection(db, 'domain-registrations'), 
+          where('domain', 'in', allDomains)
+        )
+      );
+      const registeredInDB = new Set(querySnapshot.docs.map(doc => doc.data().domain));
+
+      const results = namesWithAvailability.map((item) => ({
+        ...item,
+        available: registeredInDB.has(item.domain) ? false : item.available,
+        price: '999'
+      }));
 
       setGeneratedNames(results);
     } catch (error) {
@@ -318,7 +376,9 @@ const DomainSearch = () => {
                           <Globe size={18} className="text-brand-yellow/60" />
                           <div>
                             <span className="font-bold">{alt.domain}</span>
-                            <span className="ml-3 text-xs text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">Available</span>
+                            <span className={`ml-3 text-xs px-2 py-0.5 rounded-full ${alt.available ? 'text-emerald-500 bg-emerald-500/10' : 'text-red-500 bg-red-500/10'}`}>
+                              {alt.available ? 'Available' : 'Taken'}
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center gap-4">
@@ -327,12 +387,19 @@ const DomainSearch = () => {
                           </div>
                           <button
                             onClick={() => {
-                              setSearchResult(alt);
-                              setShowForm(true);
+                              if (alt.available) {
+                                setSearchResult(alt);
+                                setShowForm(true);
+                              }
                             }}
-                            className="bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-lg text-xs font-bold transition-all"
+                            disabled={!alt.available}
+                            className={`py-2 px-4 rounded-lg text-xs font-bold transition-all ${
+                              alt.available 
+                                ? 'bg-white/10 hover:bg-white/20 text-white' 
+                                : 'bg-white/5 text-white/20 cursor-not-allowed'
+                            }`}
                           >
-                            Select
+                            {alt.available ? 'Select' : 'Taken'}
                           </button>
                         </div>
                       </div>

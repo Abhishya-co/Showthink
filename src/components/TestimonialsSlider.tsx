@@ -45,17 +45,17 @@ const TestimonialsSlider = () => {
   }, [nextSlide]);
 
   return (
-    <section className="py-16 px-6 bg-brand-black relative overflow-hidden">
+    <section className="py-10 px-6 bg-brand-black relative overflow-hidden">
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-yellow/5 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-extrabold mb-6"
+            className="text-2xl md:text-3xl font-extrabold mb-3"
           >
             What Our <span className="text-gradient-yellow">Clients Say</span>
           </motion.h2>
@@ -64,13 +64,13 @@ const TestimonialsSlider = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-xl text-white/60 max-w-2xl mx-auto"
+            className="text-base text-white/60 max-w-xl mx-auto"
           >
             Real feedback from the businesses we've helped grow.
           </motion.p>
         </div>
 
-        <div className="relative h-[500px] md:h-[400px] flex items-center justify-center">
+        <div className="relative h-[400px] md:h-[300px] flex items-center justify-center">
           <AnimatePresence initial={false} custom={direction} mode="wait">
             <motion.div
               key={currentIndex}
@@ -86,36 +86,36 @@ const TestimonialsSlider = () => {
               }}
               className="absolute w-full max-w-4xl"
             >
-              <div className="glass-card p-8 md:p-12 relative">
-                <Quote className="absolute top-8 right-8 text-brand-yellow/20" size={80} />
+              <div className="glass-card p-6 md:p-8 relative">
+                <Quote className="absolute top-6 right-6 text-brand-yellow/20" size={40} />
                 
-                <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
                   <div className="shrink-0">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-brand-yellow rounded-full blur-md opacity-30" />
+                      <div className="absolute inset-0 bg-brand-yellow rounded-full blur-sm opacity-30" />
                       <img
                         src={TESTIMONIALS[currentIndex].image}
                         alt={TESTIMONIALS[currentIndex].name}
-                        className="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-brand-yellow/50 object-cover relative z-10"
+                        className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-brand-yellow/50 object-cover relative z-10"
                         referrerPolicy="no-referrer"
                       />
                     </div>
                   </div>
 
                   <div className="flex-grow text-center md:text-left">
-                    <div className="flex justify-center md:justify-start gap-1 text-brand-yellow mb-4">
+                    <div className="flex justify-center md:justify-start gap-1 text-brand-yellow mb-3">
                       {[...Array(TESTIMONIALS[currentIndex].rating)].map((_, i) => (
-                        <Star key={i} size={20} fill="currentColor" />
+                        <Star key={i} size={16} fill="currentColor" />
                       ))}
                     </div>
                     
-                    <p className="text-xl md:text-2xl text-white/90 italic mb-8 leading-relaxed font-medium">
+                    <p className="text-base md:text-lg text-white/90 italic mb-6 leading-relaxed font-medium">
                       "{TESTIMONIALS[currentIndex].content}"
                     </p>
 
                     <div>
-                      <h4 className="text-xl font-bold text-white">{TESTIMONIALS[currentIndex].name}</h4>
-                      <p className="text-brand-yellow font-medium">{TESTIMONIALS[currentIndex].role}</p>
+                      <h4 className="text-lg font-bold text-white">{TESTIMONIALS[currentIndex].name}</h4>
+                      <p className="text-brand-yellow text-sm font-medium">{TESTIMONIALS[currentIndex].role}</p>
                     </div>
                   </div>
                 </div>

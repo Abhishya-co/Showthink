@@ -6,13 +6,13 @@ import { Link } from 'react-router-dom';
 
 const Testimonials = () => {
   return (
-    <div className="pt-64 pb-24 px-6">
+    <div className="pt-32 pb-24 px-6">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-20">
+        <div className="text-center mb-12">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-extrabold mb-6"
+            className="text-3xl md:text-4xl font-extrabold mb-4"
           >
             Client <span className="text-gradient-blue">Success</span>
           </motion.h1>
@@ -20,7 +20,7 @@ const Testimonials = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-xl text-white/60 max-w-2xl mx-auto"
+            className="text-base text-white/60 max-w-2xl mx-auto"
           >
             We pride ourselves on delivering results that matter. Here's what our partners have to say about working with Showthink.
           </motion.p>
@@ -34,30 +34,30 @@ const Testimonials = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="glass-card p-10 relative"
+              className="glass-card p-6 relative"
             >
-              <Quote className="absolute top-8 right-8 text-brand-blue/10" size={80} />
+              <Quote className="absolute top-6 right-6 text-brand-blue/10" size={40} />
               
-              <div className="flex gap-1 text-brand-blue mb-8">
+              <div className="flex gap-1 text-brand-blue mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} size={20} fill="currentColor" />
+                  <Star key={i} size={16} fill="currentColor" />
                 ))}
               </div>
 
-              <p className="text-xl text-white/80 italic mb-10 leading-relaxed relative z-10">
+              <p className="text-base text-white/80 italic mb-6 leading-relaxed relative z-10">
                 "{testimonial.content}"
               </p>
 
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4">
                 <img
                   src={testimonial.image}
                   alt={testimonial.name}
-                  className="w-16 h-16 rounded-full border-2 border-brand-blue/30"
+                  className="w-12 h-12 rounded-full border-2 border-brand-blue/30"
                   referrerPolicy="no-referrer"
                 />
                 <div>
-                  <h4 className="text-xl font-bold">{testimonial.name}</h4>
-                  <p className="text-sm text-brand-blue font-semibold">{testimonial.role}</p>
+                  <h4 className="text-lg font-bold">{testimonial.name}</h4>
+                  <p className="text-xs text-brand-blue font-semibold">{testimonial.role}</p>
                 </div>
               </div>
             </motion.div>
