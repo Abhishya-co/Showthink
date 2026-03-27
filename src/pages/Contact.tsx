@@ -4,7 +4,7 @@ import { useLocation, Link } from 'react-router-dom';
 import { Mail, MapPin, Send, MessageSquare, AlertCircle, CheckCircle2, X, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
-import { db, serverTimestamp, handleFirestoreError, OperationType, doc, getDoc, setDoc } from '../firebase';
+import { db, serverTimestamp, handleFirestoreError, OperationType, doc, getDoc, setDoc, collection, addDoc } from '../firebase';
 
 const Contact = () => {
   const location = useLocation();
@@ -41,36 +41,16 @@ const Contact = () => {
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setDuplicateError(false);
-
-    try {
-      const isDuplicate = await checkDuplicate(formData.email);
-      if (isDuplicate) {
-        setDuplicateError(true);
-        setIsSubmitting(false);
-        return;
-      }
-      setIsConfirming(true);
-    } catch (error) {
-      console.error('Error checking duplicate:', error);
-      // If it's a permission error, it might be because the document doesn't exist 
-      // but 'get' is restricted. We'll handle this in firestore.rules.
-      setDuplicateError(false);
-      setIsConfirming(true); 
-    } finally {
-      setIsSubmitting(false);
-    }
+    setIsConfirming(true);
   };
 
   const handleFinalSubmit = async () => {
     setIsSubmitting(true);
     setIsConfirming(false);
     
-    const path = `messages/${formData.email.toLowerCase().trim()}`;
     try {
-      // Use setDoc with email as ID to enforce uniqueness at the database level
-      await setDoc(doc(db, 'messages', formData.email.toLowerCase().trim()), {
+      // Use addDoc to allow multiple submissions from the same email
+      await addDoc(collection(db, 'messages'), {
         ...formData,
         email: formData.email.toLowerCase().trim(),
         createdAt: serverTimestamp()
@@ -97,7 +77,8 @@ const Contact = () => {
       });
     } catch (error) {
       console.error('Error submitting form:', error);
-      handleFirestoreError(error, OperationType.WRITE, path);
+      handleFirestoreError(error, OperationType.WRITE, 'messages');
+      toast.error('Failed to send message. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

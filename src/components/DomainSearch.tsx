@@ -55,17 +55,8 @@ const DomainSearch = () => {
     setShowForm(false);
 
     try {
-      // Check if domain is already registered in our database
-      const q = firestoreQuery(collection(db, 'domain-registrations'), where('domain', '==', trimmedQuery));
-      const querySnapshot = await getDocs(q);
-      const isAlreadyRegistered = !querySnapshot.empty;
-
-      let isAvailable = !isAlreadyRegistered;
-      
-      // If not in our DB, still simulate some external unavailability for demo realism
-      if (isAvailable) {
-        isAvailable = Math.random() > 0.3; 
-      }
+      // Simulate domain availability check
+      const isAvailable = Math.random() > 0.4; 
 
       const domain = trimmedQuery;
       const nameWithoutTld = domain.split('.')[0];
@@ -79,7 +70,7 @@ const DomainSearch = () => {
         .filter(t => t !== tld)
         .map(t => ({
           domain: `${nameWithoutTld}${t}`,
-          available: true,
+          available: Math.random() > 0.3,
           price: domainPrices[t]
         }));
       
@@ -142,36 +133,17 @@ const DomainSearch = () => {
 
       const names: string[] = JSON.parse(response.text || "[]");
       
-      // Check domain availability for each name in our database
-      const results = await Promise.all(names.map(async (name) => {
+      // Check domain availability for each name (simulation)
+      const results = names.map((name) => {
         const domain = name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com';
         
-        try {
-          const q = firestoreQuery(collection(db, 'domain-registrations'), where('domain', '==', domain));
-          const querySnapshot = await getDocs(q);
-          const isAlreadyRegistered = !querySnapshot.empty;
-          
-          let isAvailable = !isAlreadyRegistered;
-          if (isAvailable) {
-            isAvailable = Math.random() > 0.2; // 80% chance of being available for demo
-          }
-
-          return {
-            name,
-            domain,
-            available: isAvailable,
-            price: '999'
-          };
-        } catch (error) {
-          console.error(`Error checking availability for ${domain}:`, error);
-          return {
-            name,
-            domain,
-            available: Math.random() > 0.2, // Fallback to random if query fails
-            price: '999'
-          };
-        }
-      }));
+        return {
+          name,
+          domain,
+          available: Math.random() > 0.3,
+          price: '999'
+        };
+      });
 
       setGeneratedNames(results);
     } catch (error) {

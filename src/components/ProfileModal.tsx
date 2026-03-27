@@ -32,8 +32,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
   const [industry, setIndustry] = useState('');
   const [projectUpdates, setProjectUpdates] = useState(true);
   const [marketing, setMarketing] = useState(false);
+  const [newsletter, setNewsletter] = useState(true);
   const [communication, setCommunication] = useState<'WhatsApp' | 'Email' | 'Phone'>('Email');
   const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const [language, setLanguage] = useState('English');
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('dark');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -67,8 +70,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
           if (data.settings) {
             setProjectUpdates(data.settings.notifications.projectUpdates);
             setMarketing(data.settings.notifications.marketing);
+            setNewsletter(data.settings.notifications.newsletter || false);
             setCommunication(data.settings.preferences.communication);
             setTimezone(data.settings.preferences.timezone);
+            setLanguage(data.settings.preferences.language || 'English');
+            setTheme(data.settings.preferences.theme || 'dark');
           }
         }
       } catch (err) {
@@ -149,11 +155,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
         settings: {
           notifications: {
             projectUpdates: projectUpdates,
-            marketing: marketing
+            marketing: marketing,
+            newsletter: newsletter
           },
           preferences: {
             communication: communication,
-            timezone: timezone
+            timezone: timezone,
+            language: language,
+            theme: theme
           }
         }
       };
@@ -401,6 +410,19 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                           className="w-5 h-5 accent-brand-blue"
                         />
                       </label>
+
+                      <label className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition-all">
+                        <div className="flex-1">
+                          <p className="text-sm font-bold">Newsletter</p>
+                          <p className="text-[10px] text-white/40">Weekly insights and industry trends</p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={newsletter}
+                          onChange={(e) => setNewsletter(e.target.checked)}
+                          className="w-5 h-5 accent-brand-blue"
+                        />
+                      </label>
                     </div>
                   </div>
 
@@ -421,6 +443,34 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                           <option value="WhatsApp" className="bg-brand-black">WhatsApp</option>
                           <option value="Phone" className="bg-brand-black">Phone Call</option>
                         </select>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-white/40 ml-1 uppercase tracking-wider">Language</label>
+                          <select
+                            value={language}
+                            onChange={(e) => setLanguage(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:border-brand-blue/50 focus:outline-none transition-all"
+                          >
+                            <option value="English" className="bg-brand-black">English</option>
+                            <option value="Hindi" className="bg-brand-black">Hindi</option>
+                            <option value="Spanish" className="bg-brand-black">Spanish</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-white/40 ml-1 uppercase tracking-wider">Theme</label>
+                          <select
+                            value={theme}
+                            onChange={(e) => setTheme(e.target.value as any)}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:border-brand-blue/50 focus:outline-none transition-all"
+                          >
+                            <option value="dark" className="bg-brand-black">Dark</option>
+                            <option value="light" className="bg-brand-black">Light</option>
+                            <option value="system" className="bg-brand-black">System</option>
+                          </select>
+                        </div>
                       </div>
 
                       <div className="space-y-2">

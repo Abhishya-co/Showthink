@@ -42,10 +42,13 @@ export interface UserProfile {
     notifications: {
       projectUpdates: boolean;
       marketing: boolean;
+      newsletter: boolean;
     };
     preferences: {
       communication: 'WhatsApp' | 'Email' | 'Phone';
       timezone: string;
+      language: string;
+      theme: 'light' | 'dark' | 'system';
     };
   };
   subscription?: {

@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, Zap, Star, Crown, ArrowRight, X, PartyPopper, Lock, ArrowLeft, Clock } from 'lucide-react';
+import { Check, Zap, Star, Crown, ArrowRight, X, PartyPopper, Lock, ArrowLeft, Clock, Send, MessageSquare, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import confetti from 'canvas-confetti';
-import { auth } from '../firebase';
+import { auth, db, serverTimestamp, handleFirestoreError, OperationType, doc, setDoc, collection, addDoc } from '../firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import AuthModal from './AuthModal';
+import { toast } from 'sonner';
 
 const Pricing = () => {
   const location = useLocation();
@@ -15,7 +16,20 @@ const Pricing = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [viewState, setViewState] = useState<'plans' | 'image' | 'wait'>('plans');
+  const [viewState, setViewState] = useState<'plans' | 'image' | 'wait' | 'contact'>('plans');
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    state: '',
+    city: '',
+    plan: 'None',
+    service: 'Digital Marketing',
+    message: ''
+  });
   const [countdown, setCountdown] = useState(60);
   const standardPlanRef = useRef<HTMLDivElement>(null);
 
@@ -46,10 +60,63 @@ const Pricing = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        setFormData(prev => ({
+          ...prev,
+          name: currentUser.displayName || prev.name,
+          email: currentUser.email || prev.email
+        }));
+      }
       setIsInitialLoading(false);
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (selectedPlan) {
+      setFormData(prev => ({ ...prev, plan: selectedPlan }));
+    }
+  }, [selectedPlan, viewState]);
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      await addDoc(collection(db, 'messages'), {
+        ...formData,
+        email: formData.email.toLowerCase().trim(),
+        createdAt: serverTimestamp()
+      });
+
+      setSubmitted(true);
+      toast.success('Message Sent! Your submissions coming soon.', {
+        description: "We'll get back to you within 24 hours.",
+        duration: 5000,
+      });
+
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#FFD700', '#FFFFFF', '#FACC15'],
+        ticks: 200,
+        gravity: 1.2,
+        scalar: 1.2,
+        shapes: ['circle', 'square']
+      });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      handleFirestoreError(error, OperationType.WRITE, 'messages');
+      toast.error('Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   useEffect(() => {
     // Only show popup if it's the first time claiming in this session
@@ -133,7 +200,7 @@ const Pricing = () => {
         'SEO + Speed + Security',
         'Priority 24/7 Support',
         'Delivery: 7 Days Express',
-        'Free Domain & Hosting (1yr)'
+        'Free Domain Name (1yr)'
       ],
       highlighted: false
     }
@@ -143,6 +210,223 @@ const Pricing = () => {
     <section className="pt-24 pb-6 px-6 bg-brand-black relative min-h-[600px]">
       <div className="max-w-7xl mx-auto">
         <AnimatePresence mode="wait">
+          {viewState === 'contact' && (
+            <motion.div
+              key="contact-view"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="max-w-2xl mx-auto py-12"
+            >
+              <button
+                onClick={() => setViewState('plans')}
+                className="mb-8 flex items-center gap-2 text-white/60 hover:text-brand-yellow transition-colors font-bold"
+              >
+                <ArrowLeft size={20} /> Back to Plans
+              </button>
+
+              <div className="glass-card p-8 md:p-12">
+                {submitted ? (
+                  <div className="text-center py-12">
+                    <div className="w-20 h-20 bg-brand-yellow/20 rounded-full flex items-center justify-center mx-auto mb-6 text-brand-yellow">
+                      <CheckCircle2 size={40} />
+                    </div>
+                    <h3 className="text-3xl font-bold mb-4">Message Sent!</h3>
+                    <p className="text-white/60 mb-8 leading-relaxed">
+                      Thank you for choosing the <span className="text-brand-yellow font-bold">{selectedPlan}</span>. 
+                      Our team will contact you within 24 hours for adjustments and project setup.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setViewState('plans');
+                        setSubmitted(false);
+                        setFormData({ 
+                          name: user?.displayName || '', 
+                          email: user?.email || '', 
+                          phone: '', 
+                          state: '',
+                          city: '',
+                          plan: 'None',
+                          service: 'Digital Marketing',
+                          message: '' 
+                        });
+                      }}
+                      className="btn-primary px-8"
+                    >
+                      Back to Pricing
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="mb-8">
+                      <h3 className="text-2xl font-bold mb-2">Start with {formData.plan}</h3>
+                      <p className="text-white/40 text-sm">Please fill in your details for adjustments and project setup.</p>
+                    </div>
+
+                    <form onSubmit={handleContactSubmit} className="space-y-6">
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-white/60">Full Name</label>
+                          <input
+                            required
+                            type="text"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleFormChange}
+                            placeholder="John Doe"
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-white/60">Email Address</label>
+                          <input
+                            required
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleFormChange}
+                            placeholder="john@example.com"
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-white/60">Phone Number</label>
+                          <input
+                            required
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleFormChange}
+                            placeholder="+91 00000 00000"
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-white/60">State</label>
+                          <select
+                            required
+                            name="state"
+                            value={formData.state}
+                            onChange={handleFormChange}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors appearance-none"
+                          >
+                            <option className="bg-brand-black" value="">Select State</option>
+                            <option className="bg-brand-black" value="Andhra Pradesh">Andhra Pradesh</option>
+                            <option className="bg-brand-black" value="Arunachal Pradesh">Arunachal Pradesh</option>
+                            <option className="bg-brand-black" value="Assam">Assam</option>
+                            <option className="bg-brand-black" value="Bihar">Bihar</option>
+                            <option className="bg-brand-black" value="Chhattisgarh">Chhattisgarh</option>
+                            <option className="bg-brand-black" value="Goa">Goa</option>
+                            <option className="bg-brand-black" value="Gujarat">Gujarat</option>
+                            <option className="bg-brand-black" value="Haryana">Haryana</option>
+                            <option className="bg-brand-black" value="Himachal Pradesh">Himachal Pradesh</option>
+                            <option className="bg-brand-black" value="Jharkhand">Jharkhand</option>
+                            <option className="bg-brand-black" value="Karnataka">Karnataka</option>
+                            <option className="bg-brand-black" value="Kerala">Kerala</option>
+                            <option className="bg-brand-black" value="Madhya Pradesh">Madhya Pradesh</option>
+                            <option className="bg-brand-black" value="Maharashtra">Maharashtra</option>
+                            <option className="bg-brand-black" value="Manipur">Manipur</option>
+                            <option className="bg-brand-black" value="Meghalaya">Meghalaya</option>
+                            <option className="bg-brand-black" value="Mizoram">Mizoram</option>
+                            <option className="bg-brand-black" value="Nagaland">Nagaland</option>
+                            <option className="bg-brand-black" value="Odisha">Odisha</option>
+                            <option className="bg-brand-black" value="Punjab">Punjab</option>
+                            <option className="bg-brand-black" value="Rajasthan">Rajasthan</option>
+                            <option className="bg-brand-black" value="Sikkim">Sikkim</option>
+                            <option className="bg-brand-black" value="Tamil Nadu">Tamil Nadu</option>
+                            <option className="bg-brand-black" value="Telangana">Telangana</option>
+                            <option className="bg-brand-black" value="Tripura">Tripura</option>
+                            <option className="bg-brand-black" value="Uttar Pradesh">Uttar Pradesh</option>
+                            <option className="bg-brand-black" value="Uttarakhand">Uttarakhand</option>
+                            <option className="bg-brand-black" value="West Bengal">West Bengal</option>
+                            <option className="bg-brand-black" value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                            <option className="bg-brand-black" value="Chandigarh">Chandigarh</option>
+                            <option className="bg-brand-black" value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                            <option className="bg-brand-black" value="Delhi">Delhi</option>
+                            <option className="bg-brand-black" value="Jammu and Kashmir">Jammu and Kashmir</option>
+                            <option className="bg-brand-black" value="Ladakh">Ladakh</option>
+                            <option className="bg-brand-black" value="Lakshadweep">Lakshadweep</option>
+                            <option className="bg-brand-black" value="Puducherry">Puducherry</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-white/60">City</label>
+                          <input
+                            required
+                            type="text"
+                            name="city"
+                            value={formData.city}
+                            onChange={handleFormChange}
+                            placeholder="e.g. New Delhi"
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-white/60">Select Plan</label>
+                          <select
+                            name="plan"
+                            value={formData.plan}
+                            onChange={handleFormChange}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors appearance-none"
+                          >
+                            <option className="bg-brand-black" value="None">None</option>
+                            <option className="bg-brand-black" value="Basic Plan">Basic Plan</option>
+                            <option className="bg-brand-black" value="Standard Plan">Standard Plan</option>
+                            <option className="bg-brand-black" value="Premium Plan">Premium Plan</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-2 md:col-span-2">
+                          <label className="text-sm font-bold text-white/60">Service Interested In</label>
+                          <select
+                            name="service"
+                            value={formData.service}
+                            onChange={handleFormChange}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors appearance-none"
+                          >
+                            <option className="bg-brand-black" value="Digital Marketing">Digital Marketing</option>
+                            <option className="bg-brand-black" value="Website Development">Website Development</option>
+                            <option className="bg-brand-black" value="Graphic Design">Graphic Design</option>
+                            <option className="bg-brand-black" value="Social Media Management">Social Media Management</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-white/60">Your Message</label>
+                        <textarea
+                          required
+                          name="message"
+                          value={formData.message}
+                          onChange={handleFormChange}
+                          placeholder="Tell us about your project..."
+                          rows={4}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-yellow transition-colors resize-none"
+                        ></textarea>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-lg disabled:opacity-50"
+                      >
+                        {isSubmitting ? 'Sending...' : (
+                          <>
+                            Send Details <Send size={20} />
+                          </>
+                        )}
+                      </button>
+                    </form>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          )}
+
           {viewState === 'image' && (
             <motion.div
               key="image-view"
@@ -329,7 +613,11 @@ const Pricing = () => {
                 </div>
 
                 <button
-                  onClick={() => setViewState('image')}
+                  onClick={() => {
+                    setSelectedPlan(plan.name);
+                    setFormData(prev => ({ ...prev, plan: plan.name }));
+                    setViewState('contact');
+                  }}
                   className={`w-full py-3 rounded-xl font-bold text-center transition-all duration-300 flex items-center justify-center gap-2 ${
                     plan.highlighted
                       ? 'bg-brand-yellow text-brand-black hover:shadow-[0_0_20px_rgba(250,204,21,0.4)]'

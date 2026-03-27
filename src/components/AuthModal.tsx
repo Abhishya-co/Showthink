@@ -74,11 +74,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initi
         settings: {
           notifications: {
             projectUpdates: true,
-            marketing: false
+            marketing: false,
+            newsletter: true
           },
           preferences: {
             communication: 'Email',
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            language: 'English',
+            theme: 'dark'
           }
         },
         createdAt: serverTimestamp()

@@ -79,13 +79,11 @@ service cloud.firestore {
       allow read, list, update, delete: if isAdmin();
     }
 
-    match /messages/{email} {
-      // Anyone can check if their email has already been used (get)
-      // and anyone can send a new message (create)
-      allow get: if true;
-      allow create: if isValidMessage(request.resource.data) && request.resource.id == request.resource.data.email;
-      // Only admin can list, update or delete messages
-      allow list, update, delete: if isAdmin();
+    match /messages/{messageId} {
+      // Anyone can send a new message (create)
+      allow create: if isValidMessage(request.resource.data);
+      // Only admin can read, list, update or delete messages
+      allow read, list, update, delete: if isAdmin();
     }
 
     match /users/{userId} {
