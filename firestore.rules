@@ -65,6 +65,13 @@ service cloud.firestore {
     // Collection Rules
     // ===============================================================
 
+    match /registered_domains_public/{domainId} {
+      // Anyone can check if a domain is registered
+      allow read, list: if true;
+      // Anyone can add to the public registry when they register a domain
+      allow create: if true; 
+    }
+
     match /domain-registrations/{registrationId} {
       // Anyone can submit a domain registration request
       allow create: if isValidDomainRegistration(request.resource.data);

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Globe, CheckCircle2, XCircle, ArrowRight, User, Mail, Phone, Loader2, Send, MapPin, Sparkles, RefreshCw } from 'lucide-react';
 import { db, collection, addDoc, serverTimestamp, handleFirestoreError, OperationType, query as firestoreQuery, where, getDocs } from '../firebase';
-import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 
 const DomainSearch = () => {
   const [query, setQuery] = useState('');
@@ -62,23 +62,23 @@ const DomainSearch = () => {
       const altTlds = Object.keys(domainPrices).filter(t => t !== tld);
       const allDomainsToCheck = [domain, ...altTlds.map(t => `${nameWithoutTld}${t}`)];
 
-      // 1. Check Firestore for ALL domains in parallel (much faster than individual queries)
+      // 1. Check Firestore for ALL domains in parallel (using public collection to avoid PII leak)
       const firestoreCheckPromise = getDocs(
         firestoreQuery(
-          collection(db, 'domain-registrations'), 
+          collection(db, 'registered_domains_public'), 
           where('domain', 'in', allDomainsToCheck)
         )
       );
 
       // 2. Use Gemini with Google Search for real-time availability check
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
       const geminiPromise = ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `Check real-time availability for: ${allDomainsToCheck.join(', ')}. Return JSON array of {domain: string, available: boolean}. Use Google Search.`,
+        contents: `Check real-time availability for these domains: ${allDomainsToCheck.join(', ')}. Return a JSON array of objects with "domain" (string) and "available" (boolean). Use Google Search grounding.`,
         config: {
           tools: [{ googleSearch: {} }],
           responseMimeType: "application/json",
-          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }, // Faster processing
+          // Removed ThinkingLevel to ensure compatibility
           responseSchema: {
             type: Type.ARRAY,
             items: {
@@ -120,7 +120,7 @@ const DomainSearch = () => {
       setAlternatives(alts);
     } catch (error) {
       console.error('Error searching domain:', error);
-      setSearchError('An error occurred while searching. Please try again.');
+      setSearchError(`Search failed: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
     } finally {
       setIsSearching(false);
     }
@@ -139,7 +139,15 @@ const DomainSearch = () => {
         createdAt: serverTimestamp()
       };
 
-      await addDoc(collection(db, 'domain-registrations'), registrationData);
+      // Write to both collections: one for private details, one for public availability check
+      await Promise.all([
+        addDoc(collection(db, 'domain-registrations'), registrationData),
+        addDoc(collection(db, 'registered_domains_public'), { 
+          domain: searchResult.domain, 
+          createdAt: serverTimestamp() 
+        })
+      ]);
+      
       setIsSubmitted(true);
     } catch (error) {
       console.error('Error registering domain:', error);
@@ -169,7 +177,6 @@ const DomainSearch = () => {
         config: {
           tools: [{ googleSearch: {} }],
           responseMimeType: "application/json",
-          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
           responseSchema: {
             type: Type.ARRAY,
             items: {
@@ -191,7 +198,7 @@ const DomainSearch = () => {
       const allDomains = namesWithAvailability.map(item => item.domain);
       const querySnapshot = await getDocs(
         firestoreQuery(
-          collection(db, 'domain-registrations'), 
+          collection(db, 'registered_domains_public'), 
           where('domain', 'in', allDomains)
         )
       );

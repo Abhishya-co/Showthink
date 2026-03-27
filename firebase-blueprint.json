@@ -135,7 +135,7 @@
         },
         "phone": {
           "type": "string",
-          "description": "Phone number of the registrant."
+          "description": "Phone number of the sender."
         },
         "address": {
           "type": "string",
@@ -148,6 +148,23 @@
         }
       },
       "required": ["domain", "name", "email", "phone", "createdAt"]
+    },
+    "PublicDomainRegistry": {
+      "title": "Public Domain Registry",
+      "description": "A public list of registered domains for availability checks.",
+      "type": "object",
+      "properties": {
+        "domain": {
+          "type": "string",
+          "description": "The registered domain name."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the domain was registered."
+        }
+      },
+      "required": ["domain", "createdAt"]
     }
   },
   "firestore": {
@@ -166,6 +183,10 @@
     "/domain-registrations/{registrationId}": {
       "schema": "DomainRegistration",
       "description": "Collection of domain registration requests."
+    },
+    "/registered_domains_public/{domainId}": {
+      "schema": "PublicDomainRegistry",
+      "description": "Public registry for domain availability checks."
     }
   }
 }
