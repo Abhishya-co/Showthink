@@ -10,7 +10,7 @@ const Footer = () => {
         <div className="space-y-6">
           <Link to="/" className="flex items-center gap-2">
             <img 
-              src="https://encouraging-magenta-8xwytk2odx.edgeone.app/Picsart_26-03-22_15-15-37-168.png" 
+              src="https://i.ibb.co/DfjZPT7q/Picsart-26-03-27-23-32-37-542.png" 
               alt="Showthink Logo" 
               className="h-10 w-auto object-contain"
               referrerPolicy="no-referrer"
