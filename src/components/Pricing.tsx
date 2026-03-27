@@ -269,46 +269,23 @@ const Pricing = () => {
           >
             Choose the perfect plan for your business needs. No hidden costs, just premium results.
           </motion.p>
-
-          {!user && !isInitialLoading && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="glass-card p-12 max-w-xl mx-auto border-brand-yellow/30 bg-brand-yellow/5"
-            >
-              <div className="w-16 h-16 bg-brand-yellow/20 rounded-full flex items-center justify-center mx-auto mb-6 text-brand-yellow">
-                <Lock size={32} />
-              </div>
-              <h3 className="text-2xl font-bold mb-4">Login to Unlock Plans</h3>
-              <p className="text-white/60 mb-8">
-                To view our detailed pricing and start your project, please log in to your account first.
-              </p>
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="btn-primary py-4 px-10 text-lg"
-              >
-                Login / Get Started
-              </button>
-            </motion.div>
-          )}
         </div>
 
-        {user && (
-          <div className="grid md:grid-cols-3 gap-8 items-stretch">
-            {plans.map((plan, index) => (
-              <motion.div
-                key={index}
-                ref={plan.highlighted ? standardPlanRef : null}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className={`relative flex flex-col p-6 rounded-3xl border transition-all duration-500 hover:scale-[1.02] ${
-                  plan.highlighted
-                    ? 'bg-brand-yellow/5 border-brand-yellow shadow-[0_0_30px_rgba(250,204,21,0.15)] z-10'
-                    : 'bg-white/5 border-white/10 hover:border-brand-yellow/30'
-                }`}
-              >
+        <div className="grid md:grid-cols-3 gap-8 items-stretch">
+          {plans.map((plan, index) => (
+            <motion.div
+              key={index}
+              ref={plan.highlighted ? standardPlanRef : null}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className={`relative flex flex-col p-6 rounded-3xl border transition-all duration-500 hover:scale-[1.02] ${
+                plan.highlighted
+                  ? 'bg-brand-yellow/5 border-brand-yellow shadow-[0_0_30px_rgba(250,204,21,0.15)] z-10'
+                  : 'bg-white/5 border-white/10 hover:border-brand-yellow/30'
+              }`}
+            >
                 {plan.badge && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-brand-yellow text-brand-black text-xs font-bold rounded-full uppercase tracking-widest shadow-lg">
                     {plan.badge}
@@ -364,15 +341,12 @@ const Pricing = () => {
               </motion.div>
             ))}
           </div>
-        )}
 
-        {user && viewState === 'plans' && (
-          <div className="mt-8 text-center">
-            <p className="text-white/40 text-sm">
-              Need a custom enterprise solution? <Link to="/contact" className="text-brand-yellow hover:underline">Contact us</Link> for a tailored quote.
-            </p>
-          </div>
-        )}
+        <div className="mt-8 text-center">
+          <p className="text-white/40 text-sm">
+            Need a custom enterprise solution? <Link to="/contact" className="text-brand-yellow hover:underline">Contact us</Link> for a tailored quote.
+          </p>
+        </div>
       </motion.div>
     )}
   </AnimatePresence>

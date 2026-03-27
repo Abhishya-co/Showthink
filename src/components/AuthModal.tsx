@@ -71,6 +71,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initi
         name: name || user.displayName || 'User',
         email: user.email,
         photoURL: user.photoURL || null,
+        settings: {
+          notifications: {
+            projectUpdates: true,
+            marketing: false
+          },
+          preferences: {
+            communication: 'Email',
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+          }
+        },
         createdAt: serverTimestamp()
       }, { merge: true });
     } catch (err: any) {

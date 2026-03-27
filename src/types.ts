@@ -35,6 +35,19 @@ export interface UserProfile {
   name: string;
   email: string;
   photoURL?: string;
+  phone?: string;
+  companyName?: string;
+  industry?: string;
+  settings?: {
+    notifications: {
+      projectUpdates: boolean;
+      marketing: boolean;
+    };
+    preferences: {
+      communication: 'WhatsApp' | 'Email' | 'Phone';
+      timezone: string;
+    };
+  };
   subscription?: {
     plan: 'Free' | 'Pro' | 'Enterprise';
     status: 'active' | 'inactive' | 'canceled';

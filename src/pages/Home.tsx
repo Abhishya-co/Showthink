@@ -134,6 +134,9 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Domain Search Section */}
+      <DomainSearch />
+
       {/* Services Section */}
       <section className="py-16 px-6 bg-brand-black relative">
         <div className="max-w-7xl mx-auto">
@@ -220,9 +223,6 @@ const Home = () => {
 
       {/* 7-Day Delivery Section */}
       <SevenDayDelivery />
-
-      {/* Domain Search Section */}
-      <DomainSearch />
 
       {/* Pricing Section */}
       <Pricing />

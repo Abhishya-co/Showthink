@@ -140,7 +140,7 @@ export const CASE_STUDIES = [
     solution: 'Developed a high-converting custom website with integrated booking and local SEO strategy.',
     result: '0 to 12,000+ monthly organic visitors in 6 months.',
     beforeImage: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=600&h=400&grayscale=1',
-    afterImage: 'https://senior-lavender-y8ktygggml.edgeone.app/file_0000000067c4720b95e1c4b1d5c657c5.jpg'
+    afterImage: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&q=80&w=600&h=400'
   },
   {
     id: '2',

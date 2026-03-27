@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Services from './pages/Services';
@@ -13,6 +14,7 @@ import DomainSearchPage from './pages/DomainSearchPage';
 export default function App() {
   return (
     <Router>
+      <Toaster position="top-center" richColors />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />

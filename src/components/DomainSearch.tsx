@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Globe, CheckCircle2, XCircle, ArrowRight, User, Mail, Phone, Loader2, Send, MapPin, Sparkles, RefreshCw } from 'lucide-react';
-import { db, collection, addDoc, serverTimestamp, handleFirestoreError, OperationType } from '../firebase';
+import { db, collection, addDoc, serverTimestamp, handleFirestoreError, OperationType, query as firestoreQuery, where, getDocs } from '../firebase';
 import { GoogleGenAI, Type } from "@google/genai";
 
 const DomainSearch = () => {
@@ -35,7 +35,7 @@ const DomainSearch = () => {
     '.shop': '549',
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setSearchError('');
     
@@ -54,17 +54,27 @@ const DomainSearch = () => {
     setAlternatives([]);
     setShowForm(false);
 
-    // Simulate domain search
-    setTimeout(() => {
-      const isAvailable = Math.random() > 0.3; // 70% chance of being available for demo
-      const domain = query.toLowerCase().trim();
+    try {
+      // Check if domain is already registered in our database
+      const q = firestoreQuery(collection(db, 'domain-registrations'), where('domain', '==', trimmedQuery));
+      const querySnapshot = await getDocs(q);
+      const isAlreadyRegistered = !querySnapshot.empty;
+
+      let isAvailable = !isAlreadyRegistered;
+      
+      // If not in our DB, still simulate some external unavailability for demo realism
+      if (isAvailable) {
+        isAvailable = Math.random() > 0.3; 
+      }
+
+      const domain = trimmedQuery;
       const nameWithoutTld = domain.split('.')[0];
       const tld = Object.keys(domainPrices).find(t => domain.endsWith(t)) || '.com';
       const price = domainPrices[tld] || '999';
       
       setSearchResult({ domain, available: isAvailable, price });
 
-      // Generate alternatives if not available or just to provide options
+      // Generate alternatives
       const alts = Object.keys(domainPrices)
         .filter(t => t !== tld)
         .map(t => ({
@@ -74,8 +84,12 @@ const DomainSearch = () => {
         }));
       
       setAlternatives(alts);
+    } catch (error) {
+      console.error('Error searching domain:', error);
+      setSearchError('An error occurred while searching. Please try again.');
+    } finally {
       setIsSearching(false);
-    }, 1500);
+    }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -128,16 +142,36 @@ const DomainSearch = () => {
 
       const names: string[] = JSON.parse(response.text || "[]");
       
-      // Simulate domain availability for each name
-      const results = names.map(name => {
+      // Check domain availability for each name in our database
+      const results = await Promise.all(names.map(async (name) => {
         const domain = name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com';
-        return {
-          name,
-          domain,
-          available: Math.random() > 0.2, // 80% chance of being available
-          price: '999'
-        };
-      });
+        
+        try {
+          const q = firestoreQuery(collection(db, 'domain-registrations'), where('domain', '==', domain));
+          const querySnapshot = await getDocs(q);
+          const isAlreadyRegistered = !querySnapshot.empty;
+          
+          let isAvailable = !isAlreadyRegistered;
+          if (isAvailable) {
+            isAvailable = Math.random() > 0.2; // 80% chance of being available for demo
+          }
+
+          return {
+            name,
+            domain,
+            available: isAvailable,
+            price: '999'
+          };
+        } catch (error) {
+          console.error(`Error checking availability for ${domain}:`, error);
+          return {
+            name,
+            domain,
+            available: Math.random() > 0.2, // Fallback to random if query fails
+            price: '999'
+          };
+        }
+      }));
 
       setGeneratedNames(results);
     } catch (error) {

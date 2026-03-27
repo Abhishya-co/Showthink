@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, User, Camera, Loader2, Check, AlertCircle, CreditCard, Shield, Calendar, LogOut } from 'lucide-react';
+import { X, User, Camera, Loader2, Check, AlertCircle, CreditCard, Shield, Calendar, LogOut, Settings, Bell, Globe, Building, Phone, Mail } from 'lucide-react';
 import Cropper from 'react-easy-crop';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -24,9 +24,16 @@ interface ProfileModalProps {
 }
 
 const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'subscription'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'subscription' | 'settings'>('profile');
   const [name, setName] = useState(user?.displayName || '');
   const [photoURL, setPhotoURL] = useState(user?.photoURL || '');
+  const [phone, setPhone] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [projectUpdates, setProjectUpdates] = useState(true);
+  const [marketing, setMarketing] = useState(false);
+  const [communication, setCommunication] = useState<'WhatsApp' | 'Email' | 'Phone'>('Email');
+  const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -50,7 +57,19 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
         const docRef = doc(db, 'users', user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setUserProfile(docSnap.data() as UserProfile);
+          const data = docSnap.data() as UserProfile;
+          setUserProfile(data);
+          setName(data.name || user.displayName || '');
+          setPhotoURL(data.photoURL || user.photoURL || '');
+          setPhone(data.phone || '');
+          setCompanyName(data.companyName || '');
+          setIndustry(data.industry || '');
+          if (data.settings) {
+            setProjectUpdates(data.settings.notifications.projectUpdates);
+            setMarketing(data.settings.notifications.marketing);
+            setCommunication(data.settings.preferences.communication);
+            setTimezone(data.settings.preferences.timezone);
+          }
         }
       } catch (err) {
         console.error('Error fetching profile:', err);
@@ -119,12 +138,27 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
       await updateProfile(auth.currentUser, authUpdate);
 
       // 2. Update Firestore (Firestore documents can be up to 1MB, so long URLs are fine here)
-      await setDoc(doc(db, 'users', auth.currentUser.uid), {
+      const profileUpdate: any = {
         uid: auth.currentUser.uid,
         name: name,
         email: auth.currentUser.email,
-        photoURL: photoURL
-      }, { merge: true });
+        photoURL: photoURL,
+        phone: phone,
+        companyName: companyName,
+        industry: industry,
+        settings: {
+          notifications: {
+            projectUpdates: projectUpdates,
+            marketing: marketing
+          },
+          preferences: {
+            communication: communication,
+            timezone: timezone
+          }
+        }
+      };
+      
+      await setDoc(doc(db, 'users', auth.currentUser.uid), profileUpdate, { merge: true });
 
       setSuccess(true);
       setTimeout(() => {
@@ -179,6 +213,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                   }`}
                 >
                   <User size={14} /> Profile
+                </button>
+                <button
+                  onClick={() => setActiveTab('settings')}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${
+                    activeTab === 'settings' ? 'bg-brand-blue text-brand-white' : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  <Settings size={14} /> Settings
                 </button>
                 <button
                   onClick={() => setActiveTab('subscription')}
@@ -245,13 +287,55 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
 
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-white/40 ml-1 uppercase tracking-wider">Email Address</label>
-                    <input
-                      disabled
-                      type="email"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white/40 cursor-not-allowed"
-                      value={user?.email || ''}
-                    />
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
+                      <input
+                        disabled
+                        type="email"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-white/40 cursor-not-allowed"
+                        value={user?.email || ''}
+                      />
+                    </div>
                     <p className="text-[10px] text-white/20 ml-1 italic">Email cannot be changed</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-white/40 ml-1 uppercase tracking-wider">Phone Number</label>
+                    <div className="relative">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
+                      <input
+                        type="tel"
+                        placeholder="+91 98765 43210"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-white focus:border-brand-blue/50 focus:outline-none transition-all"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-white/40 ml-1 uppercase tracking-wider">Company Name</label>
+                    <div className="relative">
+                      <Building className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
+                      <input
+                        type="text"
+                        placeholder="Your Company"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-white focus:border-brand-blue/50 focus:outline-none transition-all"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-white/40 ml-1 uppercase tracking-wider">Industry</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Technology, Retail"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:border-brand-blue/50 focus:outline-none transition-all"
+                      value={industry}
+                      onChange={(e) => setIndustry(e.target.value)}
+                    />
                   </div>
 
                     <button
@@ -284,6 +368,97 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                       </button>
                     </div>
                   </form>
+              ) : activeTab === 'settings' ? (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-bold text-brand-blue uppercase tracking-widest flex items-center gap-2">
+                      <Bell size={14} /> Notifications
+                    </h4>
+                    
+                    <div className="space-y-3">
+                      <label className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition-all">
+                        <div className="flex-1">
+                          <p className="text-sm font-bold">Project Updates</p>
+                          <p className="text-[10px] text-white/40">Get notified about project milestones</p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={projectUpdates}
+                          onChange={(e) => setProjectUpdates(e.target.checked)}
+                          className="w-5 h-5 accent-brand-blue"
+                        />
+                      </label>
+
+                      <label className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition-all">
+                        <div className="flex-1">
+                          <p className="text-sm font-bold">Marketing & News</p>
+                          <p className="text-[10px] text-white/40">Stay updated with our latest offers</p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={marketing}
+                          onChange={(e) => setMarketing(e.target.checked)}
+                          className="w-5 h-5 accent-brand-blue"
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-bold text-brand-blue uppercase tracking-widest flex items-center gap-2">
+                      <Globe size={14} /> Preferences
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-white/40 ml-1 uppercase tracking-wider">Preferred Communication</label>
+                        <select
+                          value={communication}
+                          onChange={(e) => setCommunication(e.target.value as any)}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:border-brand-blue/50 focus:outline-none transition-all"
+                        >
+                          <option value="Email" className="bg-brand-black">Email</option>
+                          <option value="WhatsApp" className="bg-brand-black">WhatsApp</option>
+                          <option value="Phone" className="bg-brand-black">Phone Call</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-white/40 ml-1 uppercase tracking-wider">Timezone</label>
+                        <div className="relative">
+                          <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
+                          <input
+                            type="text"
+                            placeholder="e.g. Asia/Kolkata"
+                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-white focus:border-brand-blue/50 focus:outline-none transition-all"
+                            value={timezone}
+                            onChange={(e) => setTimezone(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading || success}
+                    className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                      success 
+                        ? 'bg-green-500 text-white' 
+                        : 'bg-brand-blue text-brand-white hover:shadow-[0_0_20px_rgba(37,99,235,0.3)]'
+                    }`}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="animate-spin" size={20} />
+                    ) : success ? (
+                      <>
+                        <Check size={20} /> Settings Saved
+                      </>
+                    ) : (
+                      'Save Settings'
+                    )}
+                  </button>
+                </form>
               ) : (
                 <div className="space-y-6">
                   <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
@@ -328,7 +503,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user }) =>
                     </button>
                   </div>
                 </div>
-              )}
+              )
+            }
             </div>
 
             {/* Logout Confirmation Overlay */}

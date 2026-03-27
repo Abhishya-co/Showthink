@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useLocation, Link } from 'react-router-dom';
 import { Mail, MapPin, Send, MessageSquare, AlertCircle, CheckCircle2, X, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
 import { db, serverTimestamp, handleFirestoreError, OperationType, doc, getDoc, setDoc } from '../firebase';
 
 const Contact = () => {
@@ -78,6 +79,11 @@ const Contact = () => {
       setSubmitted(true);
       setFormData({ name: '', email: '', phone: '', plan: 'None', service: 'Digital Marketing', state: '', city: '', message: '' });
       
+      toast.success('Message Sent! Your submissions coming soon.', {
+        description: "We'll get back to you within 24 hours.",
+        duration: 5000,
+      });
+
       // Trigger delightful confetti
       confetti({
         particleCount: 150,
@@ -89,11 +95,6 @@ const Contact = () => {
         scalar: 1.2,
         shapes: ['circle', 'square']
       });
-
-      // Auto-reset success message after 1 second
-      setTimeout(() => {
-        setSubmitted(false);
-      }, 1000);
     } catch (error) {
       console.error('Error submitting form:', error);
       handleFirestoreError(error, OperationType.WRITE, path);
@@ -322,7 +323,7 @@ const Contact = () => {
                     transition={{ delay: 0.5 }}
                     className="text-white/70 mb-10 text-lg max-w-md mx-auto leading-relaxed"
                   >
-                    Thank you for reaching out. Our team has been notified and we'll get back to you within 24 hours.
+                    Thank you for reaching out. Your submissions coming soon. Our team has been notified and we'll get back to you within 24 hours.
                   </motion.p>
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}

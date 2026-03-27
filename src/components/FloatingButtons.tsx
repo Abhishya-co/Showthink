@@ -1,11 +1,13 @@
-import React from 'react';
-import { MessageCircle, ArrowUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowUp, X, Bot } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import ChatBot from './ChatBot';
 
 const FloatingButtons = () => {
-  const [showBackToTop, setShowBackToTop] = React.useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleScroll = () => {
       // Show button after scrolling 200px
       setShowBackToTop(window.scrollY > 200);
@@ -20,6 +22,8 @@ const FloatingButtons = () => {
 
   return (
     <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-4 items-end">
+      <ChatBot isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+
       <AnimatePresence>
         {showBackToTop && (
           <motion.button
@@ -40,16 +44,23 @@ const FloatingButtons = () => {
         )}
       </AnimatePresence>
 
-      <motion.a
-        href="https://wa.me/919911230354?text=Hi%2C%20I%20want%20to%20grow%20my%20business%20with%20Showthink"
-        target="_blank"
-        rel="noopener noreferrer"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        className="w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(37,211,102,0.4)]"
-      >
-        <MessageCircle size={32} fill="currentColor" />
-      </motion.a>
+      <div className="flex flex-col gap-3 items-end">
+        {/* AI Chatbot Button - Primary */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setIsChatOpen(!isChatOpen)}
+          className={`w-14 h-14 rounded-full flex items-center justify-center text-brand-black shadow-2xl transition-all duration-300 ${
+            isChatOpen ? 'bg-white text-brand-black' : 'bg-brand-yellow text-brand-black'
+          }`}
+          title={isChatOpen ? "Close Chat" : "Chat with AI"}
+        >
+          {isChatOpen ? <X size={28} /> : <Bot size={32} />}
+          {!isChatOpen && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-brand-black animate-pulse" />
+          )}
+        </motion.button>
+      </div>
     </div>
   );
 };

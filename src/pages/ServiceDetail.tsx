@@ -3,7 +3,7 @@ import { useParams, Link, Navigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { SERVICES } from '../constants';
 import * as Icons from 'lucide-react';
-import { ArrowLeft, CheckCircle2, ArrowRight } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ArrowRight, Twitter, Linkedin, Facebook, Share2 } from 'lucide-react';
 
 const ServiceDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -12,6 +12,30 @@ const ServiceDetail = () => {
   if (!service) {
     return <Navigate to="/services" replace />;
   }
+
+  const shareUrl = window.location.href;
+  const shareText = `Check out ${service.title} at Showthink!`;
+
+  const shareLinks = [
+    {
+      name: 'Twitter',
+      icon: Twitter,
+      url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+      color: 'hover:text-[#1DA1F2]'
+    },
+    {
+      name: 'LinkedIn',
+      icon: Linkedin,
+      url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
+      color: 'hover:text-[#0A66C2]'
+    },
+    {
+      name: 'Facebook',
+      icon: Facebook,
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+      color: 'hover:text-[#1877F2]'
+    }
+  ];
 
   const IconComponent = (Icons as any)[service.icon];
 
@@ -62,9 +86,32 @@ const ServiceDetail = () => {
               </div>
             </div>
 
-            <Link to="/contact" className="btn-primary inline-flex items-center gap-2">
-              {service.ctaText} <ArrowRight size={20} />
-            </Link>
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <Link to="/contact" className="btn-primary inline-flex items-center gap-2 w-full sm:w-auto justify-center">
+                {service.ctaText} <ArrowRight size={20} />
+              </Link>
+              
+              <div className="flex items-center gap-4 py-2 px-4 rounded-full bg-white/5 border border-white/10">
+                <span className="text-xs font-bold text-white/40 flex items-center gap-2 uppercase tracking-wider">
+                  <Share2 size={14} /> Share
+                </span>
+                <div className="h-4 w-[1px] bg-white/10" />
+                <div className="flex items-center gap-3">
+                  {shareLinks.map((link) => (
+                    <a
+                      key={link.name}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`text-white/60 transition-all duration-300 hover:scale-110 ${link.color}`}
+                      title={`Share on ${link.name}`}
+                    >
+                      <link.icon size={20} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
           </motion.div>
 
           <motion.div
