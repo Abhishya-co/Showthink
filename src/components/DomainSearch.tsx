@@ -55,36 +55,31 @@ const DomainSearch = () => {
     setShowForm(false);
 
     try {
-      // 1. Check if domain is already registered in our database
+      // Check if domain is already registered in our database
       const q = firestoreQuery(collection(db, 'domain-registrations'), where('domain', '==', trimmedQuery));
       const querySnapshot = await getDocs(q);
       const isAlreadyRegistered = !querySnapshot.empty;
 
-      if (isAlreadyRegistered) {
-        setSearchResult({ domain: trimmedQuery, available: false, price: '999' });
-        setIsSearching(false);
-        return;
+      let isAvailable = !isAlreadyRegistered;
+      
+      // If not in our DB, still simulate some external unavailability for demo realism
+      if (isAvailable) {
+        isAvailable = Math.random() > 0.3; 
       }
 
-      // 2. Check real-time availability via our backend (Hostinger API)
-      const response = await fetch(`/api/domain/check?domain=${trimmedQuery}`);
-      if (!response.ok) throw new Error('Failed to check domain availability');
-      
-      const data = await response.json();
-      
       const domain = trimmedQuery;
       const nameWithoutTld = domain.split('.')[0];
       const tld = Object.keys(domainPrices).find(t => domain.endsWith(t)) || '.com';
-      const price = data.price || domainPrices[tld] || '999';
+      const price = domainPrices[tld] || '999';
       
-      setSearchResult({ domain, available: data.available, price });
+      setSearchResult({ domain, available: isAvailable, price });
 
-      // Generate alternatives (simplified check for demo, or could check all via API)
+      // Generate alternatives
       const alts = Object.keys(domainPrices)
         .filter(t => t !== tld)
         .map(t => ({
           domain: `${nameWithoutTld}${t}`,
-          available: true, // We assume true for alts to keep it fast, or could check them too
+          available: true,
           price: domainPrices[t]
         }));
       
@@ -152,31 +147,19 @@ const DomainSearch = () => {
         const domain = name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com';
         
         try {
-          // Check Firestore first
           const q = firestoreQuery(collection(db, 'domain-registrations'), where('domain', '==', domain));
           const querySnapshot = await getDocs(q);
           const isAlreadyRegistered = !querySnapshot.empty;
           
-          if (isAlreadyRegistered) {
-            return { name, domain, available: false, price: '999' };
-          }
-
-          // Check real-time via API
-          const apiRes = await fetch(`/api/domain/check?domain=${domain}`);
-          if (apiRes.ok) {
-            const apiData = await apiRes.ok ? await apiRes.json() : { available: Math.random() > 0.2 };
-            return {
-              name,
-              domain,
-              available: apiData.available,
-              price: apiData.price || '999'
-            };
+          let isAvailable = !isAlreadyRegistered;
+          if (isAvailable) {
+            isAvailable = Math.random() > 0.2; // 80% chance of being available for demo
           }
 
           return {
             name,
             domain,
-            available: Math.random() > 0.2,
+            available: isAvailable,
             price: '999'
           };
         } catch (error) {
@@ -184,7 +167,7 @@ const DomainSearch = () => {
           return {
             name,
             domain,
-            available: Math.random() > 0.2,
+            available: Math.random() > 0.2, // Fallback to random if query fails
             price: '999'
           };
         }

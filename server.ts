@@ -74,58 +74,6 @@ async function startServer() {
     }
   });
 
-  // API Route for Hostinger Domain Check
-  app.get('/api/domain/check', async (req, res) => {
-    const { domain } = req.query;
-
-    if (!domain || typeof domain !== 'string') {
-      return res.status(400).json({ error: 'Domain name is required' });
-    }
-
-    const token = process.env.HOSTINGER_API_TOKEN;
-
-    if (!token) {
-      console.warn('HOSTINGER_API_TOKEN not set. Using simulated response.');
-      // Fallback to simulation if no token is provided
-      const isAvailable = Math.random() > 0.3;
-      return res.json({
-        available: isAvailable,
-        price: isAvailable ? '999' : null,
-        currency: 'INR',
-        simulated: true
-      });
-    }
-
-    try {
-      // Hostinger API call
-      // Note: This is a common pattern for registrar APIs. 
-      // Adjust the URL/headers if the specific Hostinger endpoint differs.
-      const response = await fetch(`https://api.hostinger.com/v1/domains/check?domain=${domain}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Hostinger API responded with ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      // Assuming Hostinger returns something like { available: true, price: 10.99, ... }
-      res.json({
-        available: data.available,
-        price: data.price || '999',
-        currency: data.currency || 'INR',
-        simulated: false
-      });
-    } catch (error) {
-      console.error('Hostinger API Error:', error);
-      res.status(500).json({ error: 'Failed to check domain availability via Hostinger' });
-    }
-  });
-
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
