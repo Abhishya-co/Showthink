@@ -42,7 +42,7 @@ const ChatBot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
       
       // Prepare context about the website
       const servicesContext = SERVICES.map(s => `- ${s.title}: ${s.shortDescription}`).join('\n');
@@ -81,7 +81,12 @@ const ChatBot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
       setMessages(prev => [...prev, { role: 'bot', text: botResponse }]);
     } catch (error) {
       console.error('Chatbot error:', error);
-      setMessages(prev => [...prev, { role: 'bot', text: "Sorry, I'm having some trouble connecting. Please try again later." }]);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('429') || errorMessage.includes('RESOURCE_EXHAUSTED')) {
+        setMessages(prev => [...prev, { role: 'bot', text: "I'm currently receiving too many requests. Please try again in a moment or contact us directly via WhatsApp! 🚀" }]);
+      } else {
+        setMessages(prev => [...prev, { role: 'bot', text: "Sorry, I'm having some trouble connecting. Please try again later or reach out to our team." }]);
+      }
     } finally {
       setIsLoading(false);
     }

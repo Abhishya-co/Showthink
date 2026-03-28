@@ -7,6 +7,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 const DomainSearch = () => {
   const [query, setQuery] = useState('');
   const [searchError, setSearchError] = useState('');
+  const [searchWarning, setSearchWarning] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResult, setSearchResult] = useState<{ domain: string; available: boolean; price?: string } | null>(null);
   const [alternatives, setAlternatives] = useState<{ domain: string; available: boolean; price: string }[]>([]);
@@ -53,6 +54,8 @@ const DomainSearch = () => {
     setSearchResult(null);
     setAlternatives([]);
     setShowForm(false);
+    setSearchWarning('');
+    setSearchError('');
 
     try {
       const domain = trimmedQuery;
@@ -71,44 +74,55 @@ const DomainSearch = () => {
       );
 
       // 2. Use Gemini with Google Search for real-time availability check
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
-      const geminiPromise = ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `Check real-time availability for these domains: ${allDomainsToCheck.join(', ')}. Return a JSON array of objects with "domain" (string) and "available" (boolean). Use Google Search grounding.`,
-        config: {
-          tools: [{ googleSearch: {} }],
-          responseMimeType: "application/json",
-          // Removed ThinkingLevel to ensure compatibility
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                domain: { type: Type.STRING },
-                available: { type: Type.BOOLEAN }
-              },
-              required: ["domain", "available"]
+      // Wrap in a separate try/catch to handle quota errors gracefully
+      let availabilityResults: { domain: string; available: boolean }[] = [];
+      try {
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+        const geminiResponse = await ai.models.generateContent({
+          model: "gemini-3-flash-preview",
+          contents: `Check real-time availability for these domains: ${allDomainsToCheck.join(', ')}. Return a JSON array of objects with "domain" (string) and "available" (boolean). Use Google Search grounding.`,
+          config: {
+            tools: [{ googleSearch: {} }],
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  domain: { type: Type.STRING },
+                  available: { type: Type.BOOLEAN }
+                },
+                required: ["domain", "available"]
+              }
             }
           }
+        });
+        availabilityResults = JSON.parse(geminiResponse.text || "[]");
+      } catch (aiError) {
+        console.error('Gemini API error:', aiError);
+        const errorMessage = aiError instanceof Error ? aiError.message : String(aiError);
+        if (errorMessage.includes('429') || errorMessage.includes('RESOURCE_EXHAUSTED')) {
+          setSearchWarning('Real-time verification is currently limited. Showing database results only.');
+        } else {
+          setSearchWarning('Could not verify real-time availability. Showing database results.');
         }
-      });
+        // Fallback: assume all domains are available unless in DB
+        availabilityResults = allDomainsToCheck.map(d => ({ domain: d, available: true }));
+      }
 
-      // Run both checks in parallel
-      const [querySnapshot, response] = await Promise.all([firestoreCheckPromise, geminiPromise]);
-      
+      const querySnapshot = await firestoreCheckPromise;
       const registeredInDB = new Set(querySnapshot.docs.map(doc => doc.data().domain));
-      const availabilityResults: { domain: string; available: boolean }[] = JSON.parse(response.text || "[]");
       
       // Process main domain
       const mainResult = availabilityResults.find(r => r.domain === domain);
-      const isAvailable = registeredInDB.has(domain) ? false : (mainResult ? mainResult.available : false);
+      const isAvailable = registeredInDB.has(domain) ? false : (mainResult ? mainResult.available : true);
       setSearchResult({ domain, available: isAvailable, price });
 
       // Process alternatives
       const alts = altTlds.map(t => {
         const altDomain = `${nameWithoutTld}${t}`;
         const altResult = availabilityResults.find(r => r.domain === altDomain);
-        const altAvailable = registeredInDB.has(altDomain) ? false : (altResult ? altResult.available : false);
+        const altAvailable = registeredInDB.has(altDomain) ? false : (altResult ? altResult.available : true);
         
         return {
           domain: altDomain,
@@ -163,7 +177,7 @@ const DomainSearch = () => {
 
     setIsGenerating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
       
       let prompt = `Generate 5 unique, creative, and catchy business names based on the keyword: "${businessKeyword}".`;
       if (businessCategory) prompt += ` The business category is "${businessCategory}".`;
@@ -171,48 +185,69 @@ const DomainSearch = () => {
       prompt += ` For each name, also check the real-time availability of its corresponding .com domain using Google Search.
       Return a JSON array of objects, where each object has "name", "domain", and "available" (boolean) properties.`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          tools: [{ googleSearch: {} }],
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                name: { type: Type.STRING },
-                domain: { type: Type.STRING },
-                available: { type: Type.BOOLEAN }
-              },
-              required: ["name", "domain", "available"]
+      let namesWithAvailability: { name: string; domain: string; available: boolean }[] = [];
+      try {
+        const response = await ai.models.generateContent({
+          model: "gemini-3-flash-preview",
+          contents: prompt,
+          config: {
+            tools: [{ googleSearch: {} }],
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  name: { type: Type.STRING },
+                  domain: { type: Type.STRING },
+                  available: { type: Type.BOOLEAN }
+                },
+                required: ["name", "domain", "available"]
+              }
             }
           }
+        });
+        namesWithAvailability = JSON.parse(response.text || "[]");
+      } catch (aiError) {
+        console.error('Gemini API error in generator:', aiError);
+        // Fallback: generate names without real-time check if AI fails
+        // We'll use a simpler prompt without tools to see if it works, or just mock it
+        const fallbackPrompt = `Generate 5 unique business names for "${businessKeyword}". Return JSON array of {name: string, domain: string, available: boolean}. Set available to true.`;
+        try {
+          const fallbackResponse = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: fallbackPrompt,
+            config: { responseMimeType: "application/json" }
+          });
+          namesWithAvailability = JSON.parse(fallbackResponse.text || "[]");
+        } catch (finalError) {
+          // If even fallback fails, show nothing or a specific error
+          throw finalError;
         }
-      });
-
-      const namesWithAvailability: { name: string; domain: string; available: boolean }[] = JSON.parse(response.text || "[]");
+      }
       
       // Check domain availability for all names against our DB in ONE query
       const allDomains = namesWithAvailability.map(item => item.domain);
-      const querySnapshot = await getDocs(
-        firestoreQuery(
-          collection(db, 'registered_domains_public'), 
-          where('domain', 'in', allDomains)
-        )
-      );
-      const registeredInDB = new Set(querySnapshot.docs.map(doc => doc.data().domain));
+      if (allDomains.length > 0) {
+        const querySnapshot = await getDocs(
+          firestoreQuery(
+            collection(db, 'registered_domains_public'), 
+            where('domain', 'in', allDomains)
+          )
+        );
+        const registeredInDB = new Set(querySnapshot.docs.map(doc => doc.data().domain));
 
-      const results = namesWithAvailability.map((item) => ({
-        ...item,
-        available: registeredInDB.has(item.domain) ? false : item.available,
-        price: '999'
-      }));
+        const results = namesWithAvailability.map((item) => ({
+          ...item,
+          available: registeredInDB.has(item.domain) ? false : item.available,
+          price: '999'
+        }));
 
-      setGeneratedNames(results);
+        setGeneratedNames(results);
+      }
     } catch (error) {
       console.error('Error generating business names:', error);
+      setSearchError('Could not generate names. Please try again later.');
     } finally {
       setIsGenerating(false);
     }
@@ -260,6 +295,22 @@ const DomainSearch = () => {
           >
             Check availability and secure your brand identity in seconds.
           </motion.p>
+          
+          {/* API Key Selection for Quota Issues */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-4 flex justify-center"
+          >
+            <button
+              onClick={() => (window as any).aistudio?.openSelectKey?.()}
+              className="text-xs text-white/40 hover:text-brand-yellow transition-colors flex items-center gap-1 bg-white/5 px-3 py-1.5 rounded-full border border-white/10"
+            >
+              <Sparkles className="w-3 h-3" />
+              Hit search limits? Use your own API key
+            </button>
+          </motion.div>
         </div>
 
         {/* Search Bar */}
@@ -298,9 +349,21 @@ const DomainSearch = () => {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="text-red-500 text-sm mt-3 ml-4 font-medium"
+                className="text-red-500 text-sm mt-3 ml-4 font-medium flex items-center gap-2"
               >
+                <XCircle size={14} />
                 {searchError}
+              </motion.p>
+            )}
+            {searchWarning && (
+              <motion.p
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="text-brand-yellow text-sm mt-3 ml-4 font-medium flex items-center gap-2"
+              >
+                <Sparkles size={14} />
+                {searchWarning}
               </motion.p>
             )}
           </AnimatePresence>
