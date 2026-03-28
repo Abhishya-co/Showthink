@@ -58,7 +58,7 @@ const DomainSearch = () => {
     setSearchError('');
 
     try {
-      const domain = trimmedQuery;
+      const domain = trimmedQuery.toLowerCase();
       const nameWithoutTld = domain.split('.')[0];
       const tld = Object.keys(domainPrices).find(t => domain.endsWith(t)) || '.com';
       const price = domainPrices[tld] || '999';
@@ -80,7 +80,15 @@ const DomainSearch = () => {
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
         const geminiResponse = await ai.models.generateContent({
           model: "gemini-3-flash-preview",
-          contents: `Check real-time availability for these domains: ${allDomainsToCheck.join(', ')}. Return a JSON array of objects with "domain" (string) and "available" (boolean). Use Google Search grounding.`,
+          contents: `Check real-time availability for these domain names: ${allDomainsToCheck.join(', ')}. 
+          
+          CRITICAL INSTRUCTIONS:
+          1. Use Google Search to verify if each domain is ALREADY REGISTERED, ACTIVE, or PARKED.
+          2. If a domain has a website, a "Coming Soon" page, or is owned by someone, set "available" to false.
+          3. Only set "available" to true if the domain is currently for sale/available for new registration.
+          4. Be very strict. If you are unsure, assume it is taken (available: false).
+          
+          Return a JSON array of objects with "domain" (string) and "available" (boolean).`,
           config: {
             tools: [{ googleSearch: {} }],
             responseMimeType: "application/json",
@@ -111,7 +119,7 @@ const DomainSearch = () => {
       }
 
       const querySnapshot = await firestoreCheckPromise;
-      const registeredInDB = new Set(querySnapshot.docs.map(doc => doc.data().domain));
+      const registeredInDB = new Set(querySnapshot.docs.map(doc => doc.data().domain.toLowerCase()));
       
       // Process main domain
       const mainResult = availabilityResults.find(r => r.domain === domain);
@@ -157,7 +165,7 @@ const DomainSearch = () => {
       await Promise.all([
         addDoc(collection(db, 'domain-registrations'), registrationData),
         addDoc(collection(db, 'registered_domains_public'), { 
-          domain: searchResult.domain, 
+          domain: searchResult.domain.toLowerCase(), 
           createdAt: serverTimestamp() 
         })
       ]);
@@ -227,7 +235,7 @@ const DomainSearch = () => {
       }
       
       // Check domain availability for all names against our DB in ONE query
-      const allDomains = namesWithAvailability.map(item => item.domain);
+      const allDomains = namesWithAvailability.map(item => item.domain.toLowerCase());
       if (allDomains.length > 0) {
         const querySnapshot = await getDocs(
           firestoreQuery(
@@ -235,11 +243,11 @@ const DomainSearch = () => {
             where('domain', 'in', allDomains)
           )
         );
-        const registeredInDB = new Set(querySnapshot.docs.map(doc => doc.data().domain));
+        const registeredInDB = new Set(querySnapshot.docs.map(doc => doc.data().domain.toLowerCase()));
 
         const results = namesWithAvailability.map((item) => ({
           ...item,
-          available: registeredInDB.has(item.domain) ? false : item.available,
+          available: registeredInDB.has(item.domain.toLowerCase()) ? false : item.available,
           price: '999'
         }));
 
